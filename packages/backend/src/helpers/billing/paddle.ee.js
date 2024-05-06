@@ -10,22 +10,32 @@ const PADDLE_VENDOR_URL = appConfig.isDev
 const axiosInstance = axios.create({ baseURL: PADDLE_VENDOR_URL });
 
 const getSubscription = async (subscriptionId) => {
+  if (typeof subscriptionId !== 'string') {
+    throw new Error('subscriptionId must be a string');
+  }
+
   const data = {
     vendor_id: appConfig.paddleVendorId,
     vendor_auth_code: appConfig.paddleVendorAuthCode,
     subscription_id: subscriptionId,
   };
 
-  const response = await axiosInstance.post(
-    '/api/2.0/subscription/users',
-    data
-  );
-  const subscription = response.data.response[0];
+  let response;
+  try {
+    response = await axiosInstance.post('/api/2.0/subscription/users', data);
+  } catch (error) {
+    throw new Error(`Error getting subscription: ${error.message}`);
+  }
+
+  const { response: subscription } = response.data;
   return subscription;
 };
 
 const getInvoices = async (subscriptionId) => {
-  // TODO: iterate over previous subscriptions and include their invoices
+  if (typeof subscriptionId !== 'string') {
+    throw new Error('subscriptionId must be a string');
+  }
+
   const data = {
     vendor_id: appConfig.paddleVendorId,
     vendor_auth_code: appConfig.paddleVendorAuthCode,
@@ -35,13 +45,14 @@ const getInvoices = async (subscriptionId) => {
     to: DateTime.now().plus({ days: 3 }).toISODate(),
   };
 
-  const response = await axiosInstance.post(
-    '/api/2.0/subscription/payments',
-    data
-  );
+  let response;
+  try {
+    response = await axiosInstance.post('/api/2.0/subscription/payments', data);
+  } catch (error) {
+    throw new Error(`Error getting invoices: ${error.message}`);
+  }
 
-  const invoices = response.data.response;
-
+  const { response: invoices } = response.data;
   return invoices;
 };
 

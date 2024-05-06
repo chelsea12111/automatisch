@@ -4,7 +4,8 @@ import authSerializer from './auth';
 
 describe('authSerializer', () => {
   it('should return auth data', async () => {
-    const auth = await App.findAuthByKey('deepl');
+    const authKey = 'deepl';
+    const auth = await App.findAuthByKey(authKey);
 
     const expectedPayload = {
       fields: auth.fields,
@@ -14,4 +15,7 @@ describe('authSerializer', () => {
 
     expect(authSerializer(auth)).toEqual(expectedPayload);
   });
+
+  // Add more tests for different scenarios if needed
 });
+

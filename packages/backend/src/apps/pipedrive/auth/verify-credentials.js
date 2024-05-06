@@ -3,10 +3,11 @@ import getCurrentUser from '../common/get-current-user.js';
 
 const verifyCredentials = async ($) => {
   const oauthRedirectUrlField = $.app.auth.fields.find(
-    (field) => field.key == 'oAuthRedirectUrl'
+    (field) => field.key === 'oAuthRedirectUrl'
   );
   const redirectUri = oauthRedirectUrlField.value;
-  const params = new URLSearchParams({
+
+  const queryParams = new URLSearchParams({
     grant_type: 'authorization_code',
     code: $.auth.data.code,
     redirect_uri: redirectUri,
@@ -19,40 +20,55 @@ const verifyCredentials = async ($) => {
     'Content-Type': 'application/x-www-form-urlencoded',
   };
 
-  const response = await $.http.post(
-    `https://oauth.pipedrive.com/oauth/token`,
-    params.toString(),
-    { headers }
-  );
+  try {
+    const response = await $.http.post(
+      `https://oauth.pipedrive.com/oauth/token`,
+      queryParams.toString(),
+      { headers }
+    );
 
-  const {
-    access_token: accessToken,
-    api_domain: apiDomain,
-    expires_in: expiresIn,
-    refresh_token: refreshToken,
-    scope: scope,
-    token_type: tokenType,
-  } = response.data;
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
 
-  await $.auth.set({
-    accessToken,
-    apiDomain,
-    expiresIn,
-    refreshToken,
-    scope,
-    tokenType,
-  });
+    const data = await response.json();
 
-  const user = await getCurrentUser($);
+    if (!data || !data.access_token) {
+      throw new Error('Invalid response data');
+    }
 
-  const screenName = [user.name, user.company_domain]
-    .filter(Boolean)
-    .join(' @ ');
+    const {
+      access_token: accessToken,
+      api_domain: apiDomain,
+      expires_in: expiresIn,
+      refresh_token: refreshToken,
+      scope,
+      token_type: tokenType,
+    } = data;
 
-  await $.auth.set({
-    userId: user.id,
-    screenName,
-  });
+    await $.auth.set({
+      accessToken,
+      apiDomain,
+      expiresIn,
+      refreshToken,
+      scope,
+      tokenType,
+    });
+
+    const user = await getCurrentUser($);
+
+    const screenName = [user.name, user.company_domain]
+      .filter(Boolean)
+      .join(' @ ');
+
+    await $.auth.set({
+      userId: user.id,
+      screenName,
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    // Handle the error here
+  }
 };
 
 export default verifyCredentials;

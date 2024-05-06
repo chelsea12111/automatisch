@@ -9,21 +9,42 @@ const newDatabaseItems = async ($) => {
   };
 
   const databaseId = $.step.parameters.databaseId;
+  if (!databaseId) {
+    console.error("Missing required parameter: databaseId");
+    return;
+  }
+
   const path = `/v1/databases/${databaseId}/query`;
+  let nextCursor = null;
+
   do {
-    const response = await $.http.post(path, payload);
+    try {
+      const response = await $.http.post(path, payload);
 
-    payload.start_cursor = response.data.next_cursor;
+      if (response.statusCode !== 200) {
+        console.error(`Unexpected status code: ${response.statusCode}`);
+        return;
+      }
 
-    for (const databaseItem of response.data.results) {
-      $.pushTriggerItem({
-        raw: databaseItem,
-        meta: {
-          internalId: databaseItem.id,
-        },
-      });
+      nextCursor = response.data.next_cursor;
+
+      for (const databaseItem of response.data.results) {
+        $.pushTriggerItem({
+          raw: databaseItem,
+          meta: {
+            internalId: databaseItem.id,
+          },
+        });
+      }
+
+      console.log(`Fetched ${response.data.results.length} items.`);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      return;
     }
-  } while (payload.start_cursor);
+  } while (nextCursor !== null && nextCursor !== '');
+
+  console.log("Finished fetching data.");
 };
 
 export default newDatabaseItems;

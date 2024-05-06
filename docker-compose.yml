@@ -1,12 +1,19 @@
 version: '3.9'
+
+networks:
+  app-network:
+    driver: bridge
+
 services:
   main:
     build:
       context: ./docker
-      dockerfile: Dockerfile.compose
+      dockerfile: Dockerfile.main
     entrypoint: /compose-entrypoint.sh
     ports:
       - '3000:3000'
+    networks:
+      - app-network
     depends_on:
       postgres:
         condition: service_healthy
@@ -27,11 +34,15 @@ services:
       - APP_SECRET_KEY
     volumes:
       - automatisch_storage:/automatisch/storage
+    restart: always
+
   worker:
     build:
       context: ./docker
-      dockerfile: Dockerfile.compose
+      dockerfile: Dockerfile.worker
     entrypoint: /compose-entrypoint.sh
+    networks:
+      - app-network
     depends_on:
       - main
     environment:
@@ -47,6 +58,8 @@ services:
       - WORKER=true
     volumes:
       - automatisch_storage:/automatisch/storage
+    restart: always
+
   postgres:
     image: 'postgres:14.5'
     environment:
@@ -60,10 +73,18 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - app-network
+    restart: always
+
   redis:
     image: 'redis:7.0.4'
     volumes:
       - redis_data:/data
+    networks:
+      - app-network
+    restart: always
+
 volumes:
   automatisch_storage:
   postgres_data:

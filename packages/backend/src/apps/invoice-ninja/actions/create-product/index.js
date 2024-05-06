@@ -1,6 +1,24 @@
 import defineAction from '../../../../helpers/define-action.js';
 import { filterProvidedFields } from '../../common/filter-provided-fields.js';
+import Joi from 'joi';
 import { fields } from './fields.js';
+
+const schema = Joi.object({
+  productKey: Joi.string().required(),
+  notes: Joi.string(),
+  price: Joi.number().required(),
+  quantity: Joi.number().required(),
+  taxRate1: Joi.number(),
+  taxName1: Joi.string(),
+  taxRate2: Joi.number(),
+  taxName2: Joi.string(),
+  taxRate3: Joi.number(),
+  taxName3: Joi.string(),
+  customValue1: Joi.string(),
+  customValue2: Joi.string(),
+  customValue3: Joi.string(),
+  customValue4: Joi.string(),
+});
 
 export default defineAction({
   name: 'Create product',
@@ -9,6 +27,11 @@ export default defineAction({
   arguments: fields,
 
   async run($) {
+    const { error } = schema.validate($.step.parameters);
+    if (error) {
+      throw new Error(`Invalid parameters: ${error.message}`);
+    }
+
     const {
       productKey,
       notes,

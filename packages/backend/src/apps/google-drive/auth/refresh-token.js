@@ -1,26 +1,31 @@
 import { URLSearchParams } from 'node:url';
+import axios from 'axios';
 
-import authScope from '../common/auth-scope.js';
+const authScope = '../common/auth-scope.js';
 
-const refreshToken = async ($) => {
+const refreshToken = async ({ auth }) => {
   const params = new URLSearchParams({
-    client_id: $.auth.data.clientId,
-    client_secret: $.auth.data.clientSecret,
+    client_id: auth.data.clientId,
+    client_secret: auth.data.clientSecret,
     grant_type: 'refresh_token',
-    refresh_token: $.auth.data.refreshToken,
+    refresh_token: auth.data.refreshToken,
   });
 
-  const { data } = await $.http.post(
-    'https://oauth2.googleapis.com/token',
-    params.toString()
-  );
+  try {
+    const response = await axios.post('https://oauth2.googleapis.com/token', params);
+    const { access_token, expires_in, token_type } = response.data;
 
-  await $.auth.set({
-    accessToken: data.access_token,
-    expiresIn: data.expires_in,
-    scope: authScope.join(' '),
-    tokenType: data.token_type,
-  });
+    auth.set({
+      accessToken: access_token,
+      expiresIn: expires_in,
+      scope: authScope.join(' '),
+      tokenType: token_type,
+    });
+
+  } catch (error) {
+    console.error('Error refreshing token:', error.message);
+    throw error;
+  }
 };
 
 export default refreshToken;

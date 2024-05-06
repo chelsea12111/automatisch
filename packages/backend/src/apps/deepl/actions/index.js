@@ -1,3 +1,12 @@
-import translateText from './translate-text/index.js';
+// translate-text.js
+const translateText = require('./translate-text');
 
-export default [translateText];
+module.exports = translateText;
+
+
+
+// index.js
+const translateText = require('./translate-text');
+
+module.exports = [translateText];
+

@@ -1,3 +1,14 @@
-import listAlbums from './list-albums/index.js';
+// list-albums.js
+const listAlbums = () => {
+  // implementation here
+};
 
-export default [listAlbums];
+export default listAlbums;
+
+// index.js
+import listAlbums from './list-albums.js';
+
+const albumServices = [listAlbums];
+
+export default albumServices;
+

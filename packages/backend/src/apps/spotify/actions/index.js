@@ -1,3 +1,18 @@
-import cratePlaylist from './create-playlist/index.js';
+// create-playlist/index.js
 
-export default [cratePlaylist];
+const createPlaylist = () => {
+  // code for creating a playlist goes here
+};
+
+export default createPlaylist;
+
+// index.js
+
+import createPlaylist from './create-playlist/index.js';
+
+const playlistActions = {
+  createPlaylist,
+};
+
+export default playlistActions;
+

@@ -1,4 +1,5 @@
 import defineAction from '../../../../helpers/define-action.js';
+import { isTimestamp, isDuration } from '../../../../helpers/time.js';
 
 export default defineAction({
   name: 'Send message',
@@ -27,6 +28,7 @@ export default defineAction({
       key: 'title',
       type: 'string',
       required: false,
+      default: 'New message',
       description: 'Message title.',
       variables: true,
     },
@@ -76,6 +78,13 @@ export default defineAction({
   async run($) {
     const { topic, message, title, email, click, attach, filename, delay } =
       $.step.parameters;
+
+    // Check if delay is a timestamp or duration
+    if (delay && !isTimestamp(delay) && !isDuration(delay)) {
+      throw new Error('Invalid delay format. Expected timestamp or duration.');
+    }
+
+    // Create payload
     const payload = {
       topic,
       message,
@@ -87,10 +96,25 @@ export default defineAction({
       delay,
     };
 
-    const response = await $.http.post('/', payload);
+    // Check if attach and filename are both present
+    if (attach && !filename) {
+      throw new Error('Attachment file name is missing.');
+    }
 
-    $.setActionItem({
-      raw: response.data,
-    });
+    try {
+      const response = await $.http.post('/', payload);
+
+      // Check if the request was successful
+      if (response.status !== 200) {
+        throw new Error('Failed to send message.');
+      }
+
+      $.setActionItem({
+        raw: response.data,
+      });
+    } catch (error) {
+      $.log('Error sending message:', error.message);
+      throw error;
+    }
   },
 });

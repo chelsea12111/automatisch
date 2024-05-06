@@ -1,5 +1,6 @@
 import newSpreadsheets from './new-spreadsheets/index.js';
-import newWorksheets from './new-worksheets/index.js';
 import newSpreadsheetRows from './new-spreadsheet-rows/index.js';
+import newWorksheets from './new-worksheets/index.js';
 
-export default [newSpreadsheets, newWorksheets, newSpreadsheetRows];
+export { newSpreadsheets, newSpreadsheetRows, newWorksheets };
+

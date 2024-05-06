@@ -1,12 +1,17 @@
 const addAuthHeader = ($, requestConfig) => {
   if (requestConfig && $.auth && $.auth.data && $.auth.data.accessToken) {
-    const authHeader = `${$.auth.data.tokenType} ${$.auth.data.accessToken}`;
-    if (!requestConfig.headers) {
-      requestConfig.headers = {};
+    const { tokenType, accessToken } = $.auth.data;
+    if (!accessToken) {
+      console.error('Access token is missing or empty');
+      return requestConfig;
     }
-    requestConfig.headers.Authorization = authHeader;
+
+    const authHeader = `${tokenType} ${accessToken}`;
+    const headers = Object.assign({}, requestConfig.headers, { Authorization: authHeader });
+    requestConfig = Object.assign({}, requestConfig, { headers });
   }
   return requestConfig;
 };
 
 module.exports = addAuthHeader;
+

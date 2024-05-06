@@ -1,6 +1,12 @@
 import defineApp from '../../helpers/define-app.js';
-import actions from './actions/index.js';
+import formatTextAction from './actions/format-text.js';
+import formatDateAction from './actions/format-date.js';
 import dynamicFields from './dynamic-fields/index.js';
+
+const actions = {
+  formatText: formatTextAction,
+  formatDate: formatDateAction,
+};
 
 export default defineApp({
   name: 'Formatter',
@@ -10,7 +16,7 @@ export default defineApp({
   supportsConnections: false,
   baseUrl: '',
   apiBaseUrl: '',
-  primaryColor: '001F52',
+  primaryColor: '#001F52', // Use hexadecimal color codes instead of decimal
   actions,
   dynamicFields,
 });

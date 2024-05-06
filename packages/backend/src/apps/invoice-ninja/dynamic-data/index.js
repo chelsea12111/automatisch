@@ -1,4 +1,10 @@
-import listClients from './list-clients/index.js';
-import listInvoices from './list-invoices/index.js';
+// Import individual modules instead of using index.js
+import listClients from './list-clients.js';
+import listInvoices from './list-invoices.js';
 
-export default [listClients, listInvoices];
+// Use a named export instead of a default export
+export {
+  listClients,
+  listInvoices,
+};
+

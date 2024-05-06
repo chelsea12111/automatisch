@@ -5,11 +5,14 @@ import createNote from './create-note/index.js';
 import createOrganization from './create-organization/index.js';
 import createPerson from './create-person/index.js';
 
-export default [
+const exports = {
   createActivity,
   createDeal,
   createLead,
   createNote,
   createOrganization,
   createPerson,
-];
+};
+
+export default exports;
+

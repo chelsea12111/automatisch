@@ -1,51 +1,60 @@
 import { DateTime } from 'luxon';
-
-import getRepoOwnerAndRepo from '../../common/get-repo-owner-and-repo.js';
+import axios from 'axios';
 import parseLinkHeader from '../../../../helpers/parse-header-link.js';
 
+const getRepoOwnerAndRepo = (repo) => {
+  if (!repo || typeof repo !== 'string' || repo.split('/').length !== 2) {
+    throw new Error('Invalid repository format');
+  }
+  const [repoOwner, repoName] = repo.split('/');
+  return { repoOwner, repoName };
+};
+
 const newStargazers = async ($) => {
-  const { repoOwner, repo } = getRepoOwnerAndRepo($.step.parameters.repo);
-  const firstPagePathname = `/repos/${repoOwner}/${repo}/stargazers`;
-  const requestConfig = {
-    params: {
-      per_page: 100,
-    },
-    headers: {
-      // needed to get `starred_at` time
-      Accept: 'application/vnd.github.star+json',
-    },
-  };
+  try {
+    const { repoOwner, repoName } = getRepoOwnerAndRepo($.step.parameters.repo);
+    const firstPagePathname = `/repos/${repoOwner}/${repoName}/stargazers`;
+    const requestConfig = {
+      params: {
+        per_page: 100,
+      },
+      headers: {
+        Accept: 'application/vnd.github.star+json',
+      },
+    };
 
-  const firstPageResponse = await $.http.get(firstPagePathname, requestConfig);
-  const firstPageLinks = parseLinkHeader(firstPageResponse.headers.link);
+    let pathname = firstPagePathname;
+    let allStars = [];
 
-  // in case there is only single page to fetch
-  let pathname = firstPageLinks.last?.uri || firstPagePathname;
+    do {
+      const response = await axios.get(pathname, requestConfig);
+      const links = parseLinkHeader(response.headers.link);
+      pathname = links.prev?.uri;
 
-  do {
-    const response = await $.http.get(pathname, requestConfig);
-    const links = parseLinkHeader(response.headers.link);
-    pathname = links.prev?.uri;
-
-    if (response.data.length) {
-      // to iterate reverse-chronologically
-      response.data.reverse();
-
-      for (const starEntry of response.data) {
-        const { starred_at, user } = starEntry;
-        const timestamp = DateTime.fromISO(starred_at).toMillis();
-
-        const dataItem = {
-          raw: user,
-          meta: {
-            internalId: timestamp.toString(),
-          },
-        };
-
-        $.pushTriggerItem(dataItem);
+      if (response.data.length) {
+        allStars = allStars.concat(response.data);
       }
+    } while (pathname);
+
+    // sort stars reverse-chronologically
+    allStars.sort((a, b) => new Date(b.starred_at) - new Date(a.starred_at));
+
+    for (const starEntry of allStars) {
+      const { starred_at, user } = starEntry;
+      const timestamp = DateTime.fromISO(starred_at).toMillis();
+
+      const dataItem = {
+        raw: user,
+        meta: {
+          internalId: timestamp.toString(),
+        },
+      };
+
+      $.pushTriggerItem(dataItem);
     }
-  } while (pathname);
+  } catch (error) {
+    $.log(`Error fetching stargazers: ${error.message}`);
+  }
 };
 
 export default newStargazers;

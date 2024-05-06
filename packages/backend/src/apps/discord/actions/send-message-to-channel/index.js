@@ -4,6 +4,7 @@ export default defineAction({
   name: 'Send a message to channel',
   key: 'sendMessageToChannel',
   description: 'Sends a message to a specific channel you specify.',
+  icon: 'message-circle', // Add an icon for better visual representation
   arguments: [
     {
       label: 'Channel',
@@ -12,15 +13,9 @@ export default defineAction({
       required: true,
       description: 'Pick a channel to send the message to.',
       variables: true,
-      source: {
-        type: 'query',
-        name: 'getDynamicData',
-        arguments: [
-          {
-            name: 'key',
-            value: 'listChannels',
-          },
-        ],
+      source: async (_, { getDynamicData }) => {
+        const channels = await getDynamicData({ key: 'listChannels' });
+        return channels.map((channel) => ({ label: channel.name, value: channel.id }));
       },
     },
     {
@@ -30,19 +25,18 @@ export default defineAction({
       required: true,
       description: 'The content of your new message.',
       variables: true,
+      hint: 'You can use variables to personalize the message.',
     },
   ],
 
   async run($) {
-    const data = {
-      content: $.step.parameters.message,
-    };
+    const { channel, message } = $.step.parameters;
 
-    const response = await $.http?.post(
-      `/channels/${$.step.parameters.channel}/messages`,
-      data
-    );
-
-    $.setActionItem({ raw: response.data });
+    try {
+      const response = await $.http.post(`/channels/${channel}/messages`, { content: message });
+      $.setActionItem({ raw: response.data });
+    } catch (error) {
+      $.notify('Error sending message:', error.message, 'error');
+    }
   },
 });

@@ -1,6 +1,12 @@
-import newActivities from './new-activities/index.js';
-import newDeals from './new-deals/index.js';
-import newLeads from './new-leads/index.js';
-import newNotes from './new-notes/index.js';
+// import individual modules instead of the default export
+import * as newActivities from './new-activities/index.js';
+import * as newDeals from './new-deals/index.js';
+import * as newLeads from './new-leads/index.js';
+import * as newNotes from './new-notes/index.js';
 
-export default [newActivities, newDeals, newLeads, newNotes];
+// create an array of the imported modules
+const modules = [newActivities, newDeals, newLeads, newNotes];
+
+// export the array using a named export
+export { modules };
+

@@ -1,22 +1,27 @@
 import parseLinkHeader from '../../../helpers/parse-header-link.js';
 
 export default async function paginateAll($, request) {
-  const response = await request;
-  const aggregatedResponse = {
-    data: [...response.data],
-  };
+  let aggregatedResponse = { data: [] };
+  let currentRequest = request;
 
-  let links = parseLinkHeader(response.headers.link);
+  try {
+    while (currentRequest) {
+      const response = await currentRequest;
+      aggregatedResponse.data.push(...response.data);
 
-  while (links.next) {
-    const nextPageResponse = await $.http.request({
-      ...response.config,
-      url: links.next.uri,
-    });
-
-    aggregatedResponse.data.push(...nextPageResponse.data);
-    links = parseLinkHeader(nextPageResponse.headers.link);
+      const links = parseLinkHeader(response.headers.link);
+      if (links.next) {
+        currentRequest = $.http.request({ ...response.config, url: links.next.uri });
+      } else {
+        currentRequest = null;
+      }
+    }
+  } catch (error) {
+    // Handle error here, e.g. logging or rethrowing
+    console.error(error);
+    throw error;
   }
 
   return aggregatedResponse;
 }
+

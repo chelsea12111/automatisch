@@ -3,8 +3,7 @@ import defineTrigger from '../../../../helpers/define-trigger.js';
 export default defineTrigger({
   name: 'New video by search',
   key: 'newVideoBySearch',
-  description:
-    'Triggers when a new video is uploaded that matches a specific search string.',
+  description: 'Triggers when a new video is uploaded that matches a specific search string.',
   arguments: [
     {
       label: 'Query',
@@ -18,9 +17,10 @@ export default defineTrigger({
 
   async run($) {
     const query = $.step.parameters.query;
+    let pageToken = undefined;
 
     const params = {
-      pageToken: undefined,
+      pageToken,
       part: 'snippet',
       q: query,
       maxResults: 50,
@@ -29,8 +29,8 @@ export default defineTrigger({
     };
 
     do {
-      const { data } = await $.http.get('/v3/search', { params });
-      params.pageToken = data.nextPageToken;
+      const response = await $.http.get('/v3/search', { params });
+      const data = response.data;
 
       if (data?.items?.length) {
         for (const item of data.items) {
@@ -42,6 +42,9 @@ export default defineTrigger({
           });
         }
       }
-    } while (params.pageToken);
+
+      pageToken = data.nextPageToken;
+
+    } while (pageToken);
   },
 });

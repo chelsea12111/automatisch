@@ -1,3 +1,13 @@
-import listTransformOptions from './list-transform-options/index.js';
+import listTransformOptions from './list-transform-options.js';
 
-export default [listTransformOptions];
+module.exports = listTransformOptions;
+
+
+// Your listTransformOptions code here
+
+module.exports = listTransformOptions;
+
+
+import listTransformOptions from './list-transform-options.js';
+
+export default listTransformOptions;

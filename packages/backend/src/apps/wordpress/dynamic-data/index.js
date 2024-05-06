@@ -1,3 +1,9 @@
-import listStatuses from './list-statuses/index.js';
+// import the `listStatuses` function directly
+import listStatuses from './list-statuses.js';
 
-export default [listStatuses];
+// create an array with the `listStatuses` function
+const statusesLists = [listStatuses];
+
+// export the array using the default export syntax
+export default statusesLists;
+

@@ -7,8 +7,13 @@ export default defineAction({
   name: 'Update ticket',
   key: 'updateTicket',
   description: 'Modify the status of an existing ticket or append comments.',
-  arguments: fields,
-
+  arguments: {
+    ...fields,
+    tags: {
+      type: 'string',
+      description: 'Comma-separated list of ticket tags.',
+    },
+  },
   async run($) {
     const {
       ticketId,
@@ -23,8 +28,11 @@ export default defineAction({
       submitterId,
     } = $.step.parameters;
 
-    const tags = $.step.parameters.tags;
-    const formattedTags = tags.split(',');
+    if (!ticketId || !subject || !assigneeId || !status || !comment || !submitterId) {
+      throw new Error('Required parameters are missing.');
+    }
+
+    const formattedTags = (tags || '').split(',').map((tag) => tag.trim());
 
     const payload = {
       subject,
@@ -48,10 +56,14 @@ export default defineAction({
       (value, key) => fieldsToRemoveIfEmpty.includes(key) && isEmpty(value)
     );
 
-    const response = await $.http.put(`/api/v2/tickets/${ticketId}`, {
-      ticket: filteredPayload,
-    });
+    try {
+      const response = await $.http.put(`/api/v2/tickets/${ticketId}`, {
+        ticket: filteredPayload,
+      });
 
-    $.setActionItem({ raw: response.data });
+      $.setActionItem({ raw: response.data });
+    } catch (error) {
+      throw new Error('Error updating the ticket:', error.message);
+    }
   },
 });

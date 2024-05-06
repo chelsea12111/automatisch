@@ -1,4 +1,5 @@
 import defineTrigger from '../../../../helpers/define-trigger.js';
+import { validate } from 'uuid';
 
 export default defineTrigger({
   name: 'New video in channel',
@@ -14,6 +15,9 @@ export default defineTrigger({
       description:
         'Get the new videos uploaded to this channel. If the URL of the youtube channel looks like this www.youtube.com/channel/UCbxb2fqe9oNgglAoYqsYOtQ then you must use UCbxb2fqe9oNgglAoYqsYOtQ as a value in this field.',
       variables: true,
+      validate: (value) => {
+        return validate(value) || 'Invalid channel ID';
+      },
     },
   ],
 
@@ -30,18 +34,23 @@ export default defineTrigger({
     };
 
     do {
-      const { data } = await $.http.get('/v3/search', { params });
-      params.pageToken = data.nextPageToken;
+      try {
+        const { data } = await $.http.get('/v3/search', { params });
 
-      if (data?.items?.length) {
-        for (const item of data.items) {
-          $.pushTriggerItem({
-            raw: item,
-            meta: {
-              internalId: item.etag,
-            },
-          });
+        if (data?.items?.length) {
+          for (const item of data.items) {
+            $.pushTriggerItem({
+              raw: item,
+              meta: {
+                internalId: item.etag,
+              },
+            });
+          }
         }
+
+        params.pageToken = data.nextPageToken;
+      } catch (error) {
+        $.log.error(`Error fetching videos: ${error.message}`);
       }
     } while (params.pageToken);
   },

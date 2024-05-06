@@ -1,18 +1,32 @@
 import { DateTime } from 'luxon';
 
-const formatDateTime = ($) => {
-  const input = $.step.parameters.input;
+type FormatDateTimeParams = {
+  input: string;
+  fromFormat?: string;
+  fromTimezone?: string;
+  toFormat?: string;
+  toTimezone?: string;
+};
 
-  const fromFormat = $.step.parameters.fromFormat;
-  const fromTimezone = $.step.parameters.fromTimezone;
+const formatDateTime = ({
+  input,
+  fromFormat = 'yyyy-MM-dd HH:mm:ss',
+  fromTimezone = 'UTC',
+  toFormat = 'yyyy-MM-dd HH:mm:ss',
+  toTimezone = 'UTC',
+}: FormatDateTimeParams): string => {
+  if (!input) {
+    throw new Error('Input is required');
+  }
 
   const inputDateTime = DateTime.fromFormat(input, fromFormat, {
     zone: fromTimezone,
     setZone: true,
   });
 
-  const toFormat = $.step.parameters.toFormat;
-  const toTimezone = $.step.parameters.toTimezone;
+  if (inputDateTime.invalid) {
+    throw new Error(`Invalid input: ${input}`);
+  }
 
   const outputDateTime = inputDateTime.setZone(toTimezone).toFormat(toFormat);
 

@@ -6,7 +6,7 @@ import actions from './actions/index.js';
 import dynamicData from './dynamic-data/index.js';
 import dynamicFields from './dynamic-fields/index.js';
 
-export default defineApp({
+const appConfig = {
   name: 'Google Sheets',
   key: 'google-sheets',
   baseUrl: 'https://docs.google.com/spreadsheets',
@@ -15,6 +15,12 @@ export default defineApp({
   authDocUrl: '{DOCS_URL}/apps/google-sheets/connection',
   primaryColor: '0F9D58',
   supportsConnections: true,
+};
+
+const enhancedAppConfig = addAuthHeader(appConfig);
+
+export default defineApp({
+  ...enhancedAppConfig,
   beforeRequest: [addAuthHeader],
   auth,
   triggers,

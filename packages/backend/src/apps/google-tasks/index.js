@@ -1,11 +1,8 @@
 import defineApp from '../../helpers/define-app.js';
 import addAuthHeader from './common/add-auth-header.js';
-import auth from './auth/index.js';
-import actions from './actions/index.js';
-import triggers from './triggers/index.js';
-import dynamicData from './dynamic-data/index.js';
+import { auth as authModule, actions as actionsModule, triggers as triggersModule, dynamicData as dynamicDataModule } from './index.js';
 
-export default defineApp({
+const appConfig = {
   name: 'Google Tasks',
   key: 'google-tasks',
   baseUrl: 'https://calendar.google.com/calendar/u/0/r/tasks',
@@ -15,8 +12,13 @@ export default defineApp({
   primaryColor: '0066DA',
   supportsConnections: true,
   beforeRequest: [addAuthHeader],
-  auth,
-  actions,
-  dynamicData,
-  triggers,
-});
+};
+
+const app = defineApp(appConfig);
+
+app.auth = authModule;
+app.actions = actionsModule;
+app.dynamicData = dynamicDataModule;
+app.triggers = triggersModule;
+
+export default app;

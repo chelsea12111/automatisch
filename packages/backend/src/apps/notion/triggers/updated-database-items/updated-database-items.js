@@ -1,5 +1,20 @@
-const updatedDatabaseItems = async ($) => {
-  const payload = {
+import type { HttpClient, HttpResponse } from '$types/http';
+
+interface DatabaseItem {
+  id: string;
+  last_edited_time: string;
+}
+
+interface QueryResponse {
+  results: DatabaseItem[];
+  next_cursor?: string;
+}
+
+const fetchUpdatedDatabaseItems = async (
+  http: HttpClient,
+  databaseId: string
+): Promise<DatabaseItem[]> => {
+  let payload = {
     sorts: [
       {
         timestamp: 'last_edited_time',
@@ -8,14 +23,22 @@ const updatedDatabaseItems = async ($) => {
     ],
   };
 
-  const databaseId = $.step.parameters.databaseId;
-  const path = `/v1/databases/${databaseId}/query`;
-  do {
-    const response = await $.http.post(path, payload);
+  let queryResponse: QueryResponse | null = { results: [] };
+  while (queryResponse && queryResponse.results.length > 0) {
+    const response = await http.post<QueryResponse>(
+      `/v1/databases/${databaseId}/query`,
+      payload
+    );
 
-    payload.start_cursor = response.data.next_cursor;
+    if (!response.ok) {
+      throw new Error(`Failed to fetch database items: ${response.statusText}`);
+    }
 
-    for (const databaseItem of response.data.results) {
+    queryResponse = response.data;
+    payload.start_cursor = queryResponse.next_cursor;
+
+    for (const databaseItem of queryResponse.results) {
+      // Add any necessary validation or transformation here
       $.pushTriggerItem({
         raw: databaseItem,
         meta: {
@@ -23,7 +46,9 @@ const updatedDatabaseItems = async ($) => {
         },
       });
     }
-  } while (payload.start_cursor);
+  }
+
+  return [];
 };
 
-export default updatedDatabaseItems;
+export default fetchUpdatedDatabaseItems;

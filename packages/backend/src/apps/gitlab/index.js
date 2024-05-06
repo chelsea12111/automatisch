@@ -1,21 +1,29 @@
 import defineApp from '../../helpers/define-app.js';
 import addAuthHeader from './common/add-auth-header.js';
 import setBaseUrl from './common/set-base-url.js';
-import auth from './auth/index.js';
-import triggers from './triggers/index.js';
-import dynamicData from './dynamic-data/index.js';
+import authConfig from './auth/index.js';
+import triggersConfig from './triggers/index.js';
+import dynamicDataConfig from './dynamic-data/index.js';
 
-export default defineApp({
+const appConfig = {
   name: 'GitLab',
   key: 'gitlab',
   baseUrl: 'https://gitlab.com',
   apiBaseUrl: 'https://gitlab.com',
-  iconUrl: '{BASE_URL}/apps/gitlab/assets/favicon.svg',
-  authDocUrl: '{DOCS_URL}/apps/gitlab/connection',
-  primaryColor: 'FC6D26',
+  iconUrl: `${appConfig.baseUrl}/apps/gitlab/assets/favicon.svg`,
+  authDocUrl: `${appConfig.docsUrl}/apps/gitlab/connection`,
+  primaryColor: '#FC6D26',
   supportsConnections: true,
   beforeRequest: [setBaseUrl, addAuthHeader],
-  auth,
-  triggers,
-  dynamicData,
-});
+};
+
+const { auth, ...authProps } = authConfig;
+appConfig.auth = { ...authProps, ...auth };
+
+const { triggers, ...triggersProps } = triggersConfig;
+appConfig.triggers = { ...triggersProps, ...triggers };
+
+const { dynamicData, ...dynamicDataProps } = dynamicDataConfig;
+appConfig.dynamicData = { ...dynamicDataProps, ...dynamicData };
+
+export default defineApp(appConfig);

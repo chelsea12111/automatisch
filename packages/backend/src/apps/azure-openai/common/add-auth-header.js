@@ -1,11 +1,13 @@
-const addAuthHeader = ($, requestConfig) => {
-  if ($.auth.data?.apiKey) {
+const addAuthHeader = ($, requestConfig = {}) => {
+  if ($.auth && $.auth.data && $.auth.data.apiKey) {
+    requestConfig.headers = requestConfig.headers || {};
     requestConfig.headers['api-key'] = $.auth.data.apiKey;
   }
 
-  requestConfig.params = {
-    'api-version': '2023-10-01-preview',
-  };
+  if ($.apiVersion) {
+    requestConfig.params = requestConfig.params || {};
+    requestConfig.params['api-version'] = $.apiVersion;
+  }
 
   return requestConfig;
 };

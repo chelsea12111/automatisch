@@ -1,4 +1,20 @@
-const formatNumber = [
+type DropdownOption = {
+  label: string;
+  value: string;
+  defaultValue?: string;
+};
+
+type FormatNumberProperty = {
+  label: string;
+  key: string;
+  type: string;
+  required: boolean;
+  description: string;
+  variables?: boolean;
+  help?: string;
+};
+
+const formatNumber: FormatNumberProperty[] = [
   {
     label: 'Input',
     key: 'input',
@@ -6,6 +22,7 @@ const formatNumber = [
     required: true,
     description: 'The number you want to format.',
     variables: true,
+    help: 'For example, "12345.67" or "1,234,5.67"',
   },
   {
     label: 'Input Decimal Mark',
@@ -15,8 +32,8 @@ const formatNumber = [
     description: 'The decimal mark of the input number.',
     variables: true,
     options: [
-      { label: 'Comma', value: ',' },
-      { label: 'Period', value: '.' },
+      { label: 'Comma', value: ',', defaultValue: ',' },
+      { label: 'Period', value: '.', defaultValue: '.' },
     ],
   },
   {
@@ -26,11 +43,12 @@ const formatNumber = [
     required: true,
     description: 'The format you want to convert the number to.',
     variables: true,
+    help: 'For example, "0" for "123,456.78" or "3" for "123 456,78"',
     options: [
-      { label: 'Comma for grouping & period for decimal', value: '0' },
-      { label: 'Period for grouping & comma for decimal', value: '1' },
-      { label: 'Space for grouping & period for decimal', value: '2' },
-      { label: 'Space for grouping & comma for decimal', value: '3' },
+      { label: 'Comma for grouping & period for decimal', value: '0', defaultValue: '0', groupingSizes: [3, 3] },
+      { label: 'Period for grouping & comma for decimal', value: '1', defaultValue: '1', groupingSizes: [3, 3] },
+      { label: 'Space for grouping & period for decimal', value: '2', defaultValue: '2', groupingSizes: [3, 3] },
+      { label: 'Space for grouping & comma for decimal', value: '3', defaultValue: '3', groupingSizes: [3, 3] },
     ],
   },
 ];

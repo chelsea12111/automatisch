@@ -1,72 +1,75 @@
-const Connection = {
+type Subject = {
+  label: string;
+  key: string;
+};
+
+type Condition = {
+  name: string;
+  key: string;
+};
+
+type Action = {
+  label: string;
+  key: string;
+  subjects: Subject[];
+};
+
+type Permission = {
+  conditions: Condition[];
+  actions: Action[];
+  subjects: Subject[];
+};
+
+const Connection: Subject = {
   label: 'Connection',
   key: 'Connection',
 };
 
-const Flow = {
+const Flow: Subject = {
   label: 'Flow',
   key: 'Flow',
 };
 
-const Execution = {
+const Execution: Subject = {
   label: 'Execution',
   key: 'Execution',
 };
 
-const permissionCatalog = {
+const permissionCatalog: Permission = {
   conditions: [
     {
+      name: 'Is creator',
       key: 'isCreator',
-      label: 'Is creator'
-    }
+    },
   ],
   actions: [
     {
       label: 'Create',
       key: 'create',
-      subjects: [
-        Connection.key,
-        Flow.key,
-      ]
+      subjects: [Connection, Flow],
     },
     {
       label: 'Read',
       key: 'read',
-      subjects: [
-        Connection.key,
-        Execution.key,
-        Flow.key,
-      ]
+      subjects: [Connection, Execution, Flow],
     },
     {
       label: 'Update',
       key: 'update',
-      subjects: [
-        Connection.key,
-        Flow.key,
-      ]
+      subjects: [Connection, Flow],
     },
     {
       label: 'Delete',
       key: 'delete',
-      subjects: [
-        Connection.key,
-        Flow.key,
-      ]
+      subjects: [Connection, Flow],
     },
     {
       label: 'Publish',
       key: 'publish',
-      subjects: [
-        Flow.key,
-      ]
-    }
+      subjects: [Flow],
+    },
   ],
-  subjects: [
-    Connection,
-    Flow,
-    Execution
-  ]
+  subjects: [Connection, Flow, Execution],
 };
 
 export default permissionCatalog;

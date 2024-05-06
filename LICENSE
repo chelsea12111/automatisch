@@ -1,3 +1,22 @@
-LICENSE.agpl (AGPL-3.0) applies to all files in this
-repository, except for files that contain ".ee." in their name
-which are covered by LICENSE.enterprise.
+# The AGPL-3.0 license applies to all files in this repository,
+# with the exception of files that contain ".ee." in their name,
+# which are covered by the LICENSE.enterprise.
+
+LICENSES = {
+    "AGPL-3.0": ["*.py", "*.sh", "*.txt", "*.md", "*.yml", "*.json", "*.csv", "*.xml", "*.properties"],
+    "LICENSE.enterprise": ["*.ee.*"]
+}
+
+for license, files in LICENSES.items():
+    for file in files:
+        filepath = f"{file}"
+        with open(filepath, "r") as f:
+            filedata = f.read()
+            if license == "AGPL-3.0":
+                if ".ee." not in filepath:
+                    filedata = filedata.replace("", f" Licensed under {license}\n")
+            elif license == "LICENSE.enterprise":
+                if ".ee." in filepath:
+                    filedata = filedata.replace("", f" Licensed under {license}\n")
+        with open(filepath, "w") as f:
+            f.write(filedata)

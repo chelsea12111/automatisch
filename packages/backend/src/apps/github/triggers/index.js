@@ -1,6 +1,13 @@
-import newIssues from './new-issues/index.js';
-import newPullRequests from './new-pull-requests/index.js';
-import newStargazers from './new-stargazers/index.js';
-import newWatchers from './new-watchers/index.js';
+const newIssues = await import('./new-issues/index.js');
+const newPullRequests = await import('./new-pull-requests/index.js');
+const newStargazers = await import('./new-stargazers/index.js');
+const newWatchers = await import('./new-watchers/index.js');
 
-export default [newIssues, newPullRequests, newStargazers, newWatchers];
+const eventHandlers = {
+  newIssues: newIssues.default,
+  newPullRequests: newPullRequests.default,
+  newStargazers: newStargazers.default,
+  newWatchers: newWatchers.default,
+};
+
+export default eventHandlers;

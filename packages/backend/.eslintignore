@@ -1,14 +1,9 @@
-node_modules
-dist
-build
-coverage
-packages/docs/*
-packages/e2e-tests
+# Directories
+src/
+  components/
+  containers/
+  utils/
+  assets/
+    images/
+    styles/
 
-.eslintrc.js
-husky.config.js
-jest.config.js
-jest.config.base.js
-lint-staged.config.js
-
-webpack.config.js

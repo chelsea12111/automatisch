@@ -3,31 +3,34 @@ import appConfig from './src/config/app.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const fileExtension = 'js';
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const knexConfig = {
   client: 'pg',
   connection: {
-    host: appConfig.postgresHost,
-    port: appConfig.postgresPort,
-    user: appConfig.postgresUsername,
-    password: appConfig.postgresPassword,
-    database: appConfig.postgresDatabase,
-    ssl: appConfig.postgresEnableSsl,
+    host: appConfig.postgres.host,
+    port: appConfig.postgres.port,
+    user: appConfig.postgres.username,
+    password: appConfig.postgres.password,
+    database: appConfig.postgres.database,
+    ssl: appConfig.postgres.enableSsl,
   },
-  asyncStackTraces: appConfig.isDev,
-  searchPath: [appConfig.postgresSchema],
-  pool: { min: 0, max: 20 },
   migrations: {
-    directory: __dirname + '/src/db/migrations',
-    extension: fileExtension,
-    loadExtensions: [`.${fileExtension}`],
+    tableName: 'knex_migrations',
+    directory: path.join(__dirname, 'src/db/migrations'),
+    extension: 'js',
   },
   seeds: {
-    directory: __dirname + '/src/db/seeds',
+    directory: path.join(__dirname, 'src/db/seeds'),
   },
-  ...(appConfig.isTest ? knexSnakeCaseMappers() : {}),
+  pool: {
+    min: 0,
+    max: 20,
+  },
+  asyncStackTraces: appConfig.env === 'development',
+  searchPath: [appConfig.postgres.schema],
+  ...(appConfig.env === 'test' ? knexSnakeCaseMappers() : {}),
 };
 
 export default knexConfig;

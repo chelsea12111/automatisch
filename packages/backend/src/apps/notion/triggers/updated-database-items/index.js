@@ -1,33 +1,42 @@
 import defineTrigger from '../../../../helpers/define-trigger.js';
+import { getDynamicData } from '../../../api.js';
 import updatedDatabaseItems from './updated-database-items.js';
 
 export default defineTrigger({
-  name: 'Updated database items',
-  key: 'updatedDatabaseItems',
+  name: 'Database Item Updated',
+  key: 'updatedDatabaseItem',
+  description: 'Triggers when an item is updated in a chosen database',
   pollInterval: 15,
-  description:
-    'Triggers when there is an update to an item in a chosen database',
-  arguments: [
+  documentations: [
+    {
+      type: 'body',
+      description: 'Triggers every 15 seconds to check for updated items in the selected database.',
+    },
+  ],
+  type: 'api',
+  inputs: [
     {
       label: 'Database',
       key: 'databaseId',
       type: 'dropdown',
       required: false,
       variables: false,
-      source: {
-        type: 'query',
-        name: 'getDynamicData',
-        arguments: [
-          {
-            name: 'key',
-            value: 'listDatabases',
-          },
-        ],
+      dataType: 'string',
+      fetchData: async () => {
+        const databases = await getDynamicData({ key: 'listDatabases' });
+        return databases.map((database) => ({
+          label: database,
+          value: database,
+        }));
       },
     },
   ],
-
   async run($) {
-    await updatedDatabaseItems($);
+    if (!$['databaseId']) {
+      $.notifyUser('Please select a database', 'warning');
+      return;
+    }
+
+    await updatedDatabaseItems($, $.databaseId);
   },
 });

@@ -1,32 +1,25 @@
 import { Router } from 'express';
 import asyncHandler from 'express-async-handler';
-import { authenticateUser } from '../../../helpers/authentication.js';
-import { authorizeUser } from '../../../helpers/authorization.js';
-import getExecutionsAction from '../../../controllers/api/v1/executions/get-executions.js';
-import getExecutionAction from '../../../controllers/api/v1/executions/get-execution.js';
-import getExecutionStepsAction from '../../../controllers/api/v1/executions/get-execution-steps.js';
+import { authenticateUser, authorizeUser } from '../../../helpers/auth.js';
+import * as executionController from '../../../controllers/api/v1/executions.js';
 
 const router = Router();
 
-router.get(
-  '/',
-  authenticateUser,
-  authorizeUser,
-  asyncHandler(getExecutionsAction)
-);
+const {
+  getExecutionsAction,
+  getExecutionAction,
+  getExecutionStepsAction,
+} = executionController;
 
-router.get(
-  '/:executionId',
-  authenticateUser,
-  authorizeUser,
-  asyncHandler(getExecutionAction)
-);
+const authMiddleware = [authenticateUser, authorizeUser];
 
+router.get('/', authMiddleware, asyncHandler(getExecutionsAction));
+router.get('/:executionId', authMiddleware, asyncHandler(getExecutionAction));
 router.get(
   '/:executionId/execution-steps',
-  authenticateUser,
-  authorizeUser,
+  authMiddleware,
   asyncHandler(getExecutionStepsAction)
 );
 
 export default router;
+

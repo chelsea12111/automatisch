@@ -26,9 +26,13 @@ export default defineAction({
       key: 'name',
       type: 'string',
       required: false,
+      default: '',
       description:
         'This field has a 2000 character limit. Any characters beyond 2000 will not be included.',
       variables: true,
+      validation: {
+        maxLength: 2000,
+      },
     },
   ],
 
@@ -36,6 +40,10 @@ export default defineAction({
     const databaseId = $.step.parameters.databaseId;
     const name = $.step.parameters.name;
     const truncatedName = name.slice(0, 2000);
+
+    if (!databaseId || !truncatedName) {
+      return $.step.setOutput('The database ID and name are required.');
+    }
 
     const body = {
       filter: {
@@ -52,13 +60,23 @@ export default defineAction({
       ],
     };
 
-    const { data } = await $.http.post(
-      `/v1/databases/${databaseId}/query`,
-      body
-    );
+    try {
+      const { data } = await $.http.post(
+        `/v1/databases/${databaseId}/query`,
+        body
+      );
 
-    $.setActionItem({
-      raw: data.results[0],
-    });
+      if (data.results.length === 0) {
+        return $.step.setOutput('No item found with the given name.');
+      }
+
+      $.setActionItem({
+        raw: data.results[0],
+      });
+
+      return $.step.setOutput('Item found successfully.');
+    } catch (error) {
+      return $.step.setOutput(`Error: ${error.message}`);
+    }
   },
 });

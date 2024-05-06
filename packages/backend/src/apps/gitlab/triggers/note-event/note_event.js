@@ -1,65 +1,81 @@
-// https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#comment-events
+// Configuration for a GitLab webhook event payload, specifically a 'note' event
+// for a commit comment.
 
-export default {
-  object_kind: 'note',
-  event_type: 'note',
+const commitCommentEventPayload = {
+  // The kind of GitLab object that triggered the event.
+  objectKind: 'note',
+
+  // The type of event that occurred.
+  eventType: 'note',
+
+  // Details about the user who created the note.
   user: {
     id: 1,
     name: 'Administrator',
     username: 'root',
-    avatar_url:
+    avatarUrl:
       'http://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=40\u0026d=identicon',
     email: 'admin@example.com',
   },
-  project_id: 5,
+
+  // The ID of the project associated with the note.
+  projectId: 5,
+
+  // Details about the project associated with the note.
   project: {
     id: 5,
     name: 'Gitlab Test',
     description: 'Aut reprehenderit ut est.',
-    web_url: 'http://example.com/gitlabhq/gitlab-test',
-    avatar_url: null,
-    git_ssh_url: 'git@example.com:gitlabhq/gitlab-test.git',
-    git_http_url: 'http://example.com/gitlabhq/gitlab-test.git',
+    webUrl: 'http://example.com/gitlabhq/gitlab-test',
+    avatarUrl: null,
+    gitSshUrl: 'git@example.com:gitlabhq/gitlab-test.git',
+    gitHttpUrl: 'http://example.com/gitlabhq/gitlab-test.git',
     namespace: 'GitlabHQ',
-    visibility_level: 20,
-    path_with_namespace: 'gitlabhq/gitlab-test',
-    default_branch: 'master',
+    visibilityLevel: 20,
+    pathWithNamespace: 'gitlabhq/gitlab-test',
+    defaultBranch: 'master',
     homepage: 'http://example.com/gitlabhq/gitlab-test',
     url: 'http://example.com/gitlabhq/gitlab-test.git',
-    ssh_url: 'git@example.com:gitlabhq/gitlab-test.git',
-    http_url: 'http://example.com/gitlabhq/gitlab-test.git',
+    sshUrl: 'git@example.com:gitlabhq/gitlab-test.git',
+    httpUrl: 'http://example.com/gitlabhq/gitlab-test.git',
   },
+
+  // Details about the repository associated with the note.
   repository: {
     name: 'Gitlab Test',
     url: 'http://example.com/gitlab-org/gitlab-test.git',
     description: 'Aut reprehenderit ut est.',
     homepage: 'http://example.com/gitlab-org/gitlab-test',
   },
-  object_attributes: {
+
+  // Details about the note itself.
+  objectAttributes: {
     id: 1243,
     note: 'This is a commit comment. How does this work?',
-    noteable_type: 'Commit',
-    author_id: 1,
-    created_at: '2015-05-17 18:08:09 UTC',
-    updated_at: '2015-05-17 18:08:09 UTC',
-    project_id: 5,
+    noteableType: 'Commit',
+    authorId: 1,
+    createdAt: '2015-05-17 18:08:09 UTC',
+    updatedAt: '2015-05-17 18:08:09 UTC',
+    projectId: 5,
     attachment: null,
-    line_code: 'bec9703f7a456cd2b4ab5fb3220ae016e3e394e3_0_1',
-    commit_id: 'cfe32cf61b73a0d5e9f13e774abde7ff789b1660',
-    noteable_id: null,
+    lineCode: 'bec9703f7a456cd2b4ab5fb3220ae016e3e394e3_0_1',
+    commitId: 'cfe32cf61b73a0d5e9f13e774abde7ff789b1660',
+    noteableId: null,
     system: false,
-    st_diff: {
+    stDiff: {
       diff: '--- /dev/null\n+++ b/six\n@@ -0,0 +1 @@\n+Subproject commit 409f37c4f05865e4fb208c771485f211a22c4c2d\n',
-      new_path: 'six',
-      old_path: 'six',
-      a_mode: '0',
-      b_mode: '160000',
-      new_file: true,
-      renamed_file: false,
-      deleted_file: false,
+      newPath: 'six',
+      oldPath: 'six',
+      aMode: '0',
+      bMode: '160000',
+      newFile: true,
+      renamedFile: false,
+      deletedFile: false,
     },
     url: 'http://example.com/gitlab-org/gitlab-test/commit/cfe32cf61b73a0d5e9f13e774abde7ff789b1660#note_1243',
   },
+
+  // Details about the commit associated with the note.
   commit: {
     id: 'cfe32cf61b73a0d5e9f13e774abde7ff789b1660',
     message:
@@ -72,3 +88,5 @@ export default {
     },
   },
 };
+
+module.exports = commitCommentEventPayload;

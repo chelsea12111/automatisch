@@ -1,6 +1,4 @@
-const trimWhitespace = ($) => {
-  const input = $.step.parameters.input;
-  return input.trim();
-};
+const trimWhitespace = (input) => input.trim();
 
 export default trimWhitespace;
+

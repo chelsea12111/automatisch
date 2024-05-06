@@ -3,25 +3,12 @@ export default {
   key: 'listNumbers',
 
   async run($) {
-    const numbers = {
-      data: [],
-    };
+    const response = await $.http.get('/v2/numbers');
+    const numbers = response.data || [];
 
-    const { data } = await $.http.get('/v2/numbers');
-
-    if (!data) {
-      return { data: [] };
-    }
-
-    if (data.length) {
-      for (const number of data) {
-        numbers.data.push({
-          value: number.number,
-          name: number.number,
-        });
-      }
-    }
-
-    return numbers;
+    return { data: numbers.map(number => ({
+      value: number.number,
+      name: number.number,
+    }))};
   },
 };

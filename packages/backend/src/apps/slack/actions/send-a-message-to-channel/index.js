@@ -22,7 +22,7 @@ export default defineAction({
             value: 'listChannels',
           },
         ],
-      },
+      } as { type: string; name: string; arguments?: { name: string; value: string }[] },
     },
     {
       label: 'Message text',
@@ -64,12 +64,26 @@ export default defineAction({
             value: '{parameters.sendAsBot}',
           },
         ],
-      },
+      } as { type: string; name: string; arguments?: { name: string; value: string }[] },
     },
   ],
 
   async run($) {
-    const message = await postMessage($);
+    const { listChannels, listFieldsAfterSendAsBot } = await $.query({
+      key: 'getDynamicData',
+      arguments: [
+        { name: 'key', value: 'listChannels' },
+        { name: 'key', value: 'listFieldsAfterSendAsBot' },
+      ],
+    });
+
+    const message = await postMessage({
+      channel: $,
+      message: $,
+      sendAsBot: $,
+      listChannels,
+      listFieldsAfterSendAsBot,
+    });
 
     return message;
   },

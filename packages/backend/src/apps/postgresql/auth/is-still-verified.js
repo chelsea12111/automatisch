@@ -1,9 +1,13 @@
 import verifyCredentials from './verify-credentials.js';
 
 const isStillVerified = async ($) => {
-  await verifyCredentials($);
-
-  return true;
+  try {
+    await verifyCredentials($);
+    return true;
+  } catch (error) {
+    console.error('Error during verification:', error);
+    return false;
+  }
 };
 
 export default isStillVerified;

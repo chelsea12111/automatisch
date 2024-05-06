@@ -1,6 +1,16 @@
 const isStillVerified = async ($) => {
-  await $.http.get('/fine_tuning/jobs');
-  return true;
+  try {
+    const response = await $.http.get('/fine_tuning/jobs');
+    if (!response.ok) {
+      console.error(`Error fetching jobs: status code ${response.status}`);
+      return false;
+    }
+    console.log('Jobs successfully fetched');
+    return true;
+  } catch (error) {
+    console.error('Error fetching jobs:', error);
+    return false;
+  }
 };
 
-export default isStillVerified;
+module.exports = isStillVerified;

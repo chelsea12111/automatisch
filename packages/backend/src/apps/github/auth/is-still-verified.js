@@ -1,4 +1,4 @@
-import getCurrentUser from '../common/get-current-user.js';
+import { getCurrentUser } from '../common/get-current-user.js';
 
 /**
  * Checks if the current user's account is still verified
@@ -6,7 +6,13 @@ import getCurrentUser from '../common/get-current-user.js';
  */
 const isStillVerified = async () => {
   const currentUser = await getCurrentUser();
-  return currentUser && currentUser.id !== undefined;
+
+  // Check if the current user exists and has a non-undefined ID
+  if (currentUser && currentUser.id !== undefined) {
+    return true;
+  }
+
+  return false;
 };
 
 export default isStillVerified;

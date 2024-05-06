@@ -1,32 +1,42 @@
+import { AxiosResponse } from 'axios';
+
 export default {
-  name: 'List calendars',
+  name: 'List Calendars',
   key: 'listCalendars',
 
-  async run($) {
-    const drives = {
+  async run($: any): Promise<{ data: { value: string; name: string }[] }> {
+    const calendars = {
       data: [],
     };
 
-    const params = {
-      pageToken: undefined,
-    };
+    let nextPageToken: string | undefined = undefined;
 
     do {
-      const { data } = await $.http.get(`/v3/users/me/calendarList`, {
-        params,
-      });
-      params.pageToken = data.nextPageToken;
+      const params = {
+        pageToken: nextPageToken,
+      };
 
-      if (data.items) {
-        for (const calendar of data.items) {
-          drives.data.push({
-            value: calendar.id,
-            name: calendar.summary,
-          });
+      let response: AxiosResponse;
+      try {
+        response = await $.http.get(`/v3/users/me/calendarList`, { params });
+      } catch (error) {
+        response = error.response;
+      }
+
+      if (response && response.data) {
+        nextPageToken = response.data.nextPageToken;
+
+        if (response.data.items) {
+          for (const calendar of response.data.items) {
+            calendars.data.push({
+              value: calendar.id,
+              name: calendar.summary,
+            });
+          }
         }
       }
-    } while (params.pageToken);
+    } while (nextPageToken !== null && nextPageToken !== undefined);
 
-    return drives;
+    return calendars;
   },
 };

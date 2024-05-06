@@ -1,33 +1,45 @@
 # syntax=docker/dockerfile:1
+
+# Use an official Node.js runtime as the base image
 FROM node:18-alpine as builder
 
+# Set the working directory to /app
+WORKDIR /app
+
+# Set an environment variable for the port
 ENV PORT 3000
 
-RUN \
-  apk --no-cache add --virtual build-dependencies python3 build-base git
+# Install build-time dependencies
+RUN apk add --no-cache --virtual .build-deps python3 build-base git
 
-WORKDIR /app
+# Copy only the package.json and package-lock.json files to minimize the number of layers
+COPY package*.json ./
 
-# copy the app, note .dockerignore
-COPY package.json package-lock.json ./
-
+# Install the dependencies
 RUN yarn
 
+# Copy the rest of the application code
 COPY . .
 
+# Build the application
 RUN yarn build
 
-RUN \
-  rm -rf /usr/local/share/.cache/ && \
-  apk del build-dependencies
+# Remove the build-time dependencies
+RUN apk del .build-deps && rm -rf /usr/local/share/.cache
 
+# Use an official Node.js runtime as the base image for the production environment
 FROM node:18-alpine
 
+# Set the working directory to /app
 WORKDIR /app
 
+# Copy only the necessary files to minimize the number of layers
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 
+# Expose the port
 EXPOSE 3000
 
+# Set the default command to run when the container starts
 CMD ["node", "dist/index.js"]
+

@@ -1,9 +1,17 @@
-const addAuthHeader = ($, requestConfig) => {
-  if ($.auth.data?.accessToken) {
-    requestConfig.headers.Authorization = `${$.auth.data.tokenType} ${$.auth.data.accessToken}`;
+const addAuthHeader = (authData, requestConfig) => {
+  if (authData && authData.accessToken) {
+    requestConfig.headers = requestConfig.headers || {};
+    requestConfig.headers.Authorization = `${authData.tokenType} ${authData.accessToken}`;
   }
 
   return requestConfig;
 };
 
-export default addAuthHeader;
+const authData = {
+  data: {
+    tokenType: 'Bearer',
+    accessToken: 'your_access_token_here'
+  }
+};
+
+export default addAuthHeader(authData);

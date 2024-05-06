@@ -1,9 +1,12 @@
 const addAuthHeader = ($, requestConfig) => {
-  if (requestConfig.headers && $.auth.data?.accessToken) {
-    requestConfig.headers.Authorization = `${$.auth.data.tokenType} ${$.auth.data.accessToken}`;
+  if (requestConfig && $.auth && $.auth.data && $.auth.data.accessToken) {
+    const authHeader = `${$.auth.data.tokenType} ${$.auth.data.accessToken}`;
+    if (!requestConfig.headers) {
+      requestConfig.headers = {};
+    }
+    requestConfig.headers.Authorization = authHeader;
   }
-
   return requestConfig;
 };
 
-export default addAuthHeader;
+module.exports = addAuthHeader;

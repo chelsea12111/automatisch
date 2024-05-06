@@ -1,6 +1,15 @@
-const getExecutionStepsMock = async (executionSteps, steps) => {
+import { ExecutionStep, Step } from './types'; // Assuming these types are defined in a separate file
+
+const getExecutionStepsMock = async (
+  executionSteps: ExecutionStep[],
+  steps: Step[],
+): Promise<{ data: typeof executionSteps; meta: { count: number; currentPage: number; isArray: true; totalPages: number; type: 'ExecutionStep'; name: string } }> => {
   const data = executionSteps.map((executionStep) => {
     const step = steps.find((step) => step.id === executionStep.stepId);
+
+    if (!step) {
+      throw new Error(`Step with id ${executionStep.stepId} not found`);
+    }
 
     return {
       id: executionStep.id,
@@ -25,13 +34,14 @@ const getExecutionStepsMock = async (executionSteps, steps) => {
   });
 
   return {
-    data: data,
+    data,
     meta: {
       count: executionSteps.length,
       currentPage: 1,
       isArray: true,
       totalPages: 1,
       type: 'ExecutionStep',
+      name: 'getExecutionStepsMock',
     },
   };
 };

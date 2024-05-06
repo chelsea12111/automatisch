@@ -1,5 +1,7 @@
-import defineTrigger from '../../../../helpers/define-trigger.js';
-import { GITLAB_EVENT_TYPE } from '../types.js';
+import { defineTrigger } from '../../../../helpers/define-trigger.js';
+import {
+  GITLAB_EVENT_TYPE,
+} from '../types.js';
 import {
   getRegisterHookFn,
   getRunFn,
@@ -8,20 +10,35 @@ import {
   unregisterHook,
 } from '../lib.js';
 
-// confidential_issues_events has the same event data as issues_events
 import data from './issue_event.js';
+
+const registerHookFn = getRegisterHookFn(GITLAB_EVENT_TYPE.confidential_issues_events);
+const runFn = getRunFn($);
+const testRunFn = getTestRunFn(data);
 
 export const triggerDescriptor = {
   name: 'Confidential issue event',
-  description:
-    'Confidential issue event (triggered when a new confidential issue is created or an existing issue is updated, closed, or reopened)',
-  // info: 'https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#issue-events',
+  description: 'Confidential issue event (triggered when a new confidential issue is created or an existing issue is updated, closed, or reopened)',
   key: GITLAB_EVENT_TYPE.confidential_issues_events,
   type: 'webhook',
   arguments: [projectArgumentDescriptor],
-  run: ($) => getRunFn($),
-  testRun: getTestRunFn(data),
-  registerHook: getRegisterHookFn(GITLAB_EVENT_TYPE.confidential_issues_events),
+  run: async ($) => {
+    try {
+      await runFn($);
+    } catch (error) {
+      // handle error
+      console.error(error);
+    }
+  },
+  testRun: async (data) => {
+    try {
+      await testRunFn(data);
+    } catch (error) {
+      // handle error
+      console.error(error);
+    }
+  },
+  registerHook,
   unregisterHook,
 };
 

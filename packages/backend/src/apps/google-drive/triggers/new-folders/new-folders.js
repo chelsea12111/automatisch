@@ -1,41 +1,56 @@
 const newFolders = async ($) => {
+  // Validate function parameters
+  if (!$.step || !$.step.parameters) {
+    throw new Error('Invalid function parameters');
+  }
+
+  const { driveId, folderId } = $.step.parameters;
+
   let q = "mimeType='application/vnd.google-apps.folder'";
-  if ($.step.parameters.folderId) {
-    q += ` and '${$.step.parameters.folderId}' in parents`;
+  if (folderId) {
+    q += ` and '${folderId}' in parents`;
   } else {
     q += ` and parents in 'root'`;
   }
 
   const params = {
-    pageToken: undefined,
-    orderBy: 'createdTime desc',
-    fields: '*',
     pageSize: 1000,
     q,
-    driveId: $.step.parameters.driveId,
-    supportsAllDrives: true,
+    fields: '*',
+    orderBy: 'createdTime desc',
   };
 
-  if ($.step.parameters.driveId) {
+  if (driveId) {
+    params.driveId = driveId;
+    params.supportsAllDrives = true;
     params.includeItemsFromAllDrives = true;
     params.corpora = 'drive';
   }
 
-  do {
-    const { data } = await $.http.get(`/v3/files`, { params });
-    params.pageToken = data.nextPageToken;
+  let pageToken = undefined;
 
-    if (data.files?.length) {
-      for (const file of data.files) {
-        $.pushTriggerItem({
-          raw: file,
-          meta: {
-            internalId: file.id,
-          },
-        });
+  do {
+    // Add try-catch block for error handling
+    try {
+      const { data } = await $.http.get(`/v3/files`, { params, pageToken });
+
+      if (data.files?.length) {
+        for (const file of data.files) {
+          $.pushTriggerItem({
+            raw: file,
+            meta: {
+              internalId: file.id,
+            },
+          });
+        }
       }
+
+      pageToken = data.nextPageToken;
+    } catch (error) {
+      // Handle errors here
+      console.error(error);
     }
-  } while (params.pageToken);
+  } while (pageToken);
 };
 
 export default newFolders;

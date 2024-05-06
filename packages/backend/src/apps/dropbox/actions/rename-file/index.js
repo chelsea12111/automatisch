@@ -13,12 +13,6 @@ export default defineAction({
       required: true,
       description: 'Write the full path to the file such as /Folder1/File.pdf',
       variables: true,
-      typeChecker: (value) => {
-        if (typeof value !== 'string') {
-          throw new Error('File Path must be a string');
-        }
-        return true;
-      },
     },
     {
       label: 'New Name',
@@ -28,18 +22,24 @@ export default defineAction({
       description:
         "Enter the new name for the file (without the extension, e.g., '.pdf')",
       variables: true,
-      typeChecker: (value) => {
-        if (typeof value !== 'string') {
-          throw new Error('New Name must be a string');
-        }
-        return true;
-      },
     },
   ],
 
   async run($) {
-    const filePath = $.step.parameters.filePath;
-    const newName = $.step.parameters.newName;
+    const validate = (value, label) => {
+      if (typeof value !== 'string') {
+        throw new Error(`${label} must be a string`);
+      }
+      if (value.trim() === '') {
+        throw new Error(`${label} cannot be empty`);
+      }
+    };
+
+    const { filePath, newName } = $.step.parameters;
+
+    validate(filePath, 'File Path');
+    validate(newName, 'New Name');
+
     const fileObject = path.parse(filePath);
 
     // Check that the new name does not contain the file extension
@@ -67,9 +67,9 @@ export default defineAction({
       $.setActionItem({ raw: response.data.metadata });
     } catch (error) {
       if (error.response?.data?.error?.code === 'file_not_found') {
-        throw new Error('File not found');
+        throw new Error('The specified file was not found');
       } else if (error.response?.data?.error?.code === 'cant_rename') {
-        throw new Error('File cannot be renamed');
+        throw new Error('The file cannot be renamed due to permission or other issues');
       } else {
         throw error;
       }

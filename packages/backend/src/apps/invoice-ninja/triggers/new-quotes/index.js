@@ -1,8 +1,9 @@
-import Crypto from 'crypto';
-import isEmpty from 'lodash/isEmpty.js';
-import defineTrigger from '../../../../helpers/define-trigger.js';
+import { nanoid } from 'nanoid';
+import defineTrigger from '../../../../helpers/define-trigger';
+import { retry } from 'async-retry';
+import axios from 'axios';
 
-export default defineTrigger({
+export default defineTrigger<void, void>({
   name: 'New quotes',
   key: 'newQuotes',
   type: 'webhook',
@@ -13,7 +14,7 @@ export default defineTrigger({
     const dataItem = {
       raw: $.request.body,
       meta: {
-        internalId: Crypto.randomUUID(),
+        internalId: nanoid(),
       },
     };
 
@@ -21,15 +22,32 @@ export default defineTrigger({
   },
 
   async testRun($) {
-    const lastExecutionStep = await $.getLastExecutionStep();
+    try {
+      const lastExecutionStep = await $.getLastExecutionStep();
 
-    if (!isEmpty(lastExecutionStep?.dataOut)) {
-      $.pushTriggerItem({
-        raw: lastExecutionStep.dataOut,
-        meta: {
-          internalId: '',
+      if (!lastExecutionStep?.dataOut) {
+        throw new Error('No data output found');
+      }
+
+      await retry(
+        async () => {
+          const dataItem = {
+            raw: lastExecutionStep.dataOut,
+            meta: {
+              internalId: nanoid(),
+            },
+          };
+
+          $.pushTriggerItem(dataItem);
         },
-      });
+        {
+          retries: 3,
+          minTimeout: 1000,
+          maxTimeout: 5000,
+        }
+      );
+    } catch (error) {
+      $.log.error('Test run failed:', error.message);
     }
   },
 
@@ -43,12 +61,23 @@ export default defineTrigger({
       rest_method: 'post',
     };
 
-    const response = await $.http.post('/v1/webhooks', payload);
+    try {
+      const response = await axios.post('/v1/webhooks', payload);
 
-    await $.flow.setRemoteWebhookId(response.data.data.id);
+      await $.flow.setRemoteWebhookId(response.data.data.id);
+    } catch (error) {
+      $.log.error('Failed to register hook:', error.message);
+    }
   },
 
   async unregisterHook($) {
-    await $.http.delete(`/v1/webhooks/${$.flow.remoteWebhookId}`);
+    try {
+      await axios.delete(`/v1/webhooks/${$.flow.remoteWebhookId}`);
+    } catch (error) {
+      $.log.error('Failed to unregister hook:', error.message);
+    }
   },
 });
+
+
+npm install async-retry axios

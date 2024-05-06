@@ -1,7 +1,12 @@
 import defineApp from '../../helpers/define-app.js';
 import addAuthHeader from './common/add-auth-header.js';
-import auth from './auth/index.js';
-import actions from './actions/index.js';
+import authConfig from './auth/index.js';
+import actionsConfig from './actions/index.js';
+
+const auth = { ...authConfig };
+const actions = { ...actionsConfig };
+
+auth.beforeRequest = [addAuthHeader];
 
 export default defineApp({
   name: 'Dropbox',
@@ -12,7 +17,6 @@ export default defineApp({
   baseUrl: 'https://dropbox.com',
   apiBaseUrl: 'https://api.dropboxapi.com',
   primaryColor: '0061ff',
-  beforeRequest: [addAuthHeader],
   auth,
   actions,
 });

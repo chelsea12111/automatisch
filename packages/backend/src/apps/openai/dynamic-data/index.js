@@ -1,3 +1,9 @@
-import listModels from './list-models/index.js';
+// list-models.js
+export const listModels = [
+  // add models to the list
+];
 
-export default [listModels];
+// index.js
+import { listModels } from './list-models.js';
+
+export default listModels;

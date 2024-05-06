@@ -3,7 +3,7 @@ import appConfig from '../../config/app.js';
 const testPlans = [
   {
     name: '10k - monthly',
-    limit: '10,000',
+    limit: 10000,
     quota: 10000,
     price: '€20',
     productId: '47384',
@@ -13,17 +13,21 @@ const testPlans = [
 const prodPlans = [
   {
     name: '10k - monthly',
-    limit: '10,000',
+    limit: 10000,
     quota: 10000,
     price: '€20',
     productId: '826658',
   },
 ];
 
-const plans = appConfig.isProd ? prodPlans : testPlans;
+const plans = appConfig && appConfig.isProd ? prodPlans : testPlans;
 
 export function getPlanById(id) {
-  return plans.find((plan) => plan.productId === id);
+  const plan = plans.find((plan) => plan.productId === id);
+  if (!plan) {
+    return null;
+  }
+  return plan;
 }
 
 export default plans;

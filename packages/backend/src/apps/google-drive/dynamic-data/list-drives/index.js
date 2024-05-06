@@ -1,31 +1,27 @@
+import axios from 'axios';
+
 export default {
   name: 'List drives',
   key: 'listDrives',
 
-  async run($) {
-    const drives = {
-      data: [{ value: null, name: 'My Google Drive' }],
-    };
-
-    const params = {
-      pageSize: 100,
-      pageToken: undefined,
-    };
+  async run() {
+    const drives = [{ value: null, name: 'My Google Drive' }];
+    let pageToken = undefined;
 
     do {
-      const { data } = await $.http.get(`/v3/drives`, { params });
-      params.pageToken = data.nextPageToken;
+      const params = {
+        pageSize: 100,
+        pageToken,
+      };
 
-      if (data.drives) {
-        for (const drive of data.drives) {
-          drives.data.push({
-            value: drive.id,
-            name: drive.name,
-          });
-        }
-      }
-    } while (params.pageToken);
+      const response = await axios.get('/v3/drives', { params });
+      pageToken = response.data.nextPageToken;
+
+      const newDrives = response.data.drives || [];
+      drives.push(...newDrives.map((drive) => ({ value: drive.id, name: drive.name })));
+    } while (pageToken);
 
     return drives;
   },
 };
+

@@ -1,58 +1,55 @@
-import { Model } from 'objection';
+import { Model, QueryBuilder } from 'objection';
 
-const DELETED_COLUMN_NAME = 'deleted_at';
+const DELETED_COLUMN_NAME = 'deleted_at' as const;
 
-const supportsSoftDeletion = (modelClass) => {
-  return modelClass.jsonSchema.properties.deletedAt;
+const supportsSoftDeletion = <T extends typeof Model>(modelClass: T) => {
+  return (modelClass.jsonSchema.properties as any).deletedAt !== undefined;
 };
 
-const buildQueryBuidlerForClass = () => {
-  return (modelClass) => {
-    const qb = Model.QueryBuilder.forClass.call(
-      ExtendedQueryBuilder,
-      modelClass
-    );
-    qb.onBuild((builder) => {
-      if (
-        !builder.context().withSoftDeleted &&
-        supportsSoftDeletion(qb.modelClass())
-      ) {
-        builder.whereNull(
-          `${qb.modelClass().tableName}.${DELETED_COLUMN_NAME}`
-        );
-      }
-    });
-    return qb;
-  };
+const buildQueryBuilderForClass = <T extends typeof Model>(
+  modelClass: T
+) => {
+  const qb = QueryBuilder.forClass(ExtendedQueryBuilder, modelClass);
+  qb.onBuild((builder) => {
+    if (
+      !builder.context().withSoftDeleted &&
+      supportsSoftDeletion(modelClass)
+    ) {
+      builder.whereNull(
+        `${modelClass.tableName}.${DELETED_COLUMN_NAME}`
+      );
+    }
+  });
+  return qb;
 };
 
-class ExtendedQueryBuilder extends Model.QueryBuilder {
-  static forClass = buildQueryBuidlerForClass();
+class ExtendedQueryBuilder extends QueryBuilder {
+  static forClass<T extends typeof Model>(
+    modelClass: T
+  ): QueryBuilder<InstanceType<T>> {
+    return buildQueryBuilderForClass(modelClass);
+  }
 
-  delete() {
-    if (supportsSoftDeletion(this.modelClass())) {
+  delete = () => {
+    if (supportsSoftDeletion(this.modelClass)) {
       return this.patch({
         [DELETED_COLUMN_NAME]: new Date().toISOString(),
       });
     }
 
     return super.delete();
-  }
+  };
 
-  hardDelete() {
-    return super.delete();
-  }
+  hardDelete = () => super.delete();
 
-  withSoftDeleted() {
+  withSoftDeleted = () => {
     this.context().withSoftDeleted = true;
     return this;
-  }
+  };
 
-  restore() {
-    return this.patch({
-      [DELETED_COLUMN_NAME]: null,
-    });
-  }
+  restore = () => this.patch({
+    [DELETED_COLUMN_NAME]: null,
+  });
 }
 
 export default ExtendedQueryBuilder;

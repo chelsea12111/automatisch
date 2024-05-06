@@ -1,18 +1,25 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import App from '../../../../models/app';
-import app from '../../../../app.js';
+import app from '../../../../app';
 import createAuthTokenByUserId from '../../../../helpers/create-auth-token-by-user-id';
-import { createUser } from '../../../../../test/factories/user';
+import { createUser, generateApps } from '../../../../../test/factories';
 import getAppsMock from '../../../../../test/mocks/rest/api/v1/apps/get-apps.js';
+
+const createTestApps = async () => {
+  const user = await createUser();
+  const apps = generateApps(5);
+  await App.bulkCreate(apps);
+  return apps;
+};
 
 describe('GET /api/v1/apps', () => {
   let currentUser, apps, token;
 
   beforeEach(async () => {
+    apps = await createTestApps();
     currentUser = await createUser();
     token = await createAuthTokenByUserId(currentUser.id);
-    apps = await App.findAll();
   });
 
   it('should return all apps', async () => {
@@ -61,3 +68,4 @@ describe('GET /api/v1/apps', () => {
     expect(response.body).toEqual(expectedPayload);
   });
 });
+

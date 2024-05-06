@@ -1,29 +1,37 @@
+import { defu } from 'defu';
+import { HTTP } from 'meteor/http';
+
 export default {
   name: 'List voice channels',
   key: 'listVoiceChannels',
 
   async run($) {
-    const channels = {
+    const defaultChannels = {
       data: [],
       error: null,
     };
 
-    const response = await $.http.get(
-      `/guilds/${$.auth.data.guildId}/channels`
-    );
+    const guildId = $.auth.data.guildId;
+    const apiUrl = `/guilds/${guildId}/channels`;
+    const config = {
+      headers: {
+        Authorization: `Bearer ${$.auth.data.accessToken}`,
+      },
+    };
 
-    channels.data = response.data
-      .filter((channel) => {
-        // filter in voice and stage channels only
-        return channel.type === 2 || channel.type === 13;
-      })
-      .map((channel) => {
-        return {
-          value: channel.id,
-          name: channel.name,
-        };
-      });
+    try {
+      const response = await HTTP.get(apiUrl, config);
+      const channels = response.data.filter(
+        (channel) => channel.type === 2 || channel.type === 13
+      );
+      const channelList = channels.map((channel) => ({
+        value: channel.id,
+        name: channel.name,
+      }));
 
-    return channels;
+      return defu(defaultChannels, { data: channelList });
+    } catch (error) {
+      return defu(defaultChannels, { error: error.message });
+    }
   },
 };

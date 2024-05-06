@@ -1,6 +1,8 @@
 import { URLSearchParams } from 'node:url';
 import defineAction from '../../../../helpers/define-action.js';
 
+const PHONE_REGEX = /^\+\d{1,3}\d{9,14}$/;
+
 export default defineAction({
   name: 'Send an SMS',
   key: 'sendSms',
@@ -24,6 +26,7 @@ export default defineAction({
           },
         ],
       },
+      validation: (value) => PHONE_REGEX.test(value.trim()),
     },
     {
       label: 'To Number',
@@ -33,6 +36,7 @@ export default defineAction({
       description:
         'The number to send the SMS to. Include country code. Example: 15551234567',
       variables: true,
+      validation: (value) => PHONE_REGEX.test(value.trim()),
     },
     {
       label: 'Message',
@@ -41,6 +45,7 @@ export default defineAction({
       required: true,
       description: 'The message to send.',
       variables: true,
+      validation: (value) => value.trim().length > 0,
     },
   ],
 
@@ -51,14 +56,27 @@ export default defineAction({
     const fromNumber = $.step.parameters.fromNumber.trim();
     const toNumber = $.step.parameters.toNumber.trim();
 
+    if (!PHONE_REGEX.test(fromNumber) || !PHONE_REGEX.test(toNumber)) {
+      throw new Error('Invalid phone number');
+    }
+
+    if (messageBody.trim().length === 0) {
+      throw new Error('Message cannot be empty');
+    }
+
     const payload = new URLSearchParams({
       Body: messageBody,
       From: fromNumber,
       To: toNumber,
     }).toString();
 
-    const response = await $.http.post(requestPath, payload);
-
-    $.setActionItem({ raw: response.data });
+    try {
+      const response = await $.http.post(requestPath, payload);
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Add a delay to avoid rate limiting
+      $.setActionItem({ raw: response.data });
+    } catch (error) {
+      $.log.error('Error sending SMS:', error);
+      throw error;
+    }
   },
 });

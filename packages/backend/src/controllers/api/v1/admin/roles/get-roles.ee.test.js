@@ -1,4 +1,4 @@
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { vi, describe, it, expect, beforeEach, describe as describeOnly } from 'vitest';
 import request from 'supertest';
 import app from '../../../../../app.js';
 import createAuthTokenByUserId from '../../../../../helpers/create-auth-token-by-user-id.js';
@@ -7,7 +7,7 @@ import { createUser } from '../../../../../../test/factories/user.js';
 import getRolesMock from '../../../../../../test/mocks/rest/api/v1/admin/roles/get-roles.ee.js';
 import * as license from '../../../../../helpers/license.ee.js';
 
-describe('GET /api/v1/admin/roles', () => {
+describeOnly('GET /api/v1/admin/roles', () => {
   let roleOne, roleTwo, currentUser, token;
 
   beforeEach(async () => {
@@ -16,6 +16,10 @@ describe('GET /api/v1/admin/roles', () => {
     currentUser = await createUser({ roleId: roleOne.id });
 
     token = await createAuthTokenByUserId(currentUser.id);
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
   });
 
   it('should return roles', async () => {
@@ -29,5 +33,6 @@ describe('GET /api/v1/admin/roles', () => {
     const expectedPayload = await getRolesMock([roleOne, roleTwo]);
 
     expect(response.body).toEqual(expectedPayload);
+    expect(license.hasValidLicense).toHaveBeenCalledTimes(1);
   });
 });

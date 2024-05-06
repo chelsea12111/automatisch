@@ -1,4 +1,5 @@
 import defineTrigger from '../../../../helpers/define-trigger.js';
+import { sleep } from '../../../../helpers/utils.js';
 
 export default defineTrigger({
   name: 'New posts matching search',
@@ -27,22 +28,44 @@ export default defineTrigger({
       after: undefined,
     };
 
-    do {
-      const { data } = await $.http.get('/search', {
-        params,
-      });
-      params.after = data.data.after;
+    const maxRetries = 5;
+    let retries = 0;
 
-      if (data.data.children?.length) {
-        for (const item of data.data.children) {
-          $.pushTriggerItem({
-            raw: item,
-            meta: {
-              internalId: item.data.id,
-            },
-          });
+    do {
+      try {
+        const { data } = await $.http.get('/search', {
+          params,
+        });
+
+        if (data.data.children?.length) {
+          for (const item of data.data.children) {
+            $.pushTriggerItem({
+              raw: item,
+              meta: {
+                internalId: item.data.id,
+              },
+            });
+          }
+        }
+
+        if (data.data.after) {
+          params.after = data.data.after;
+        } else {
+          break;
+        }
+
+        retries = 0;
+
+      } catch (error) {
+        retries++;
+        if (retries < maxRetries) {
+          await sleep(5000); // Wait for 5 seconds before retrying
+        } else {
+          throw error;
         }
       }
+
     } while (params.after);
   },
 });
+

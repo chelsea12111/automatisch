@@ -1,6 +1,10 @@
 import isObject from 'lodash/isObject.js';
 
 export function filterProvidedFields(body) {
+  if (typeof body !== 'object' || body === null) {
+    throw new Error('The body parameter must be a non-null object');
+  }
+
   return Object.keys(body).reduce((result, key) => {
     const value = body[key];
 
@@ -9,10 +13,11 @@ export function filterProvidedFields(body) {
       if (Object.keys(filteredNestedObj).length > 0) {
         result[key] = filteredNestedObj;
       }
-    } else if (body[key]) {
+    } else if (value !== undefined) {
       result[key] = value;
     }
 
     return result;
   }, {});
 }
+

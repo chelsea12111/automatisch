@@ -8,21 +8,21 @@ import {
   unregisterHook,
 } from '../lib.js';
 
-// confidential_note_events has the same event data as note_events
 import data from './note_event.js';
 
-export const triggerDescriptor = {
+const triggerDescriptor = {
   name: 'Confidential comment event',
-  description:
-    'Confidential comment event (triggered when a new confidential comment is made on commits, merge requests, issues, and code snippets)',
-  // info: 'https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#comment-events',
+  description: 'Confidential comment event (triggered when a new confidential comment is made on commits, merge requests, issues, and code snippets)',
   key: GITLAB_EVENT_TYPE.confidential_note_events,
   type: 'webhook',
   arguments: [projectArgumentDescriptor],
-  run: ($) => getRunFn($),
-  testRun: getTestRunFn(data),
-  registerHook: getRegisterHookFn(GITLAB_EVENT_TYPE.confidential_note_events),
+  run: ($) => {
+    return getRunFn($);
+  },
+  testRun: (eventData) => getTestRunFn(data, eventData),
+  registerHook: (project) => getRegisterHookFn(GITLAB_EVENT_TYPE.confidential_note_events)(project),
   unregisterHook,
 };
 
 export default defineTrigger(triggerDescriptor);
+

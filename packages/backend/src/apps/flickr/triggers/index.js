@@ -1,13 +1,17 @@
-// Import individual modules instead of default export
-import * as newAlbums from './new-albums/index.js';
-import * as newFavoritePhotos from './new-favorite-photos/index.js';
-import * as newPhotos from './new-photos/index.js';
-import * as newPhotosInAlbums from './new-photos-in-album/index.js';
+// Import individual modules and destructure named exports
+import { getNewAlbums, addNewAlbum } from './new-albums/index.js';
+import { getNewFavoritePhotos, addNewFavoritePhoto } from './new-favorite-photos/index.js';
+import { getNewPhotos, addNewPhoto } from './new-photos/index.js';
+import { getNewPhotosInAlbum, addNewPhotoInAlbum } from './new-photos-in-album/index.js';
 
-// Export an object with named properties for each module
+// Export an object with named properties for each module function
 export default {
-  newAlbums,
-  newFavoritePhotos,
-  newPhotos,
-  newPhotosInAlbums,
+  getNewAlbums,
+  addNewAlbum,
+  getNewFavoritePhotos,
+  addNewFavoritePhoto,
+  getNewPhotos,
+  addNewPhoto,
+  getNewPhotosInAlbum,
+  addNewPhotoInAlbum,
 };

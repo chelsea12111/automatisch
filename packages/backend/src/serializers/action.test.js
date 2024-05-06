@@ -3,11 +3,17 @@ import App from '../models/app';
 import actionSerializer from './action';
 
 describe('actionSerializer', () => {
-  it('should return the action data', async () => {
-    const actions = await App.findActionsByKey('github');
-    const action = actions[0];
+  let app;
+  let actions;
+  let action;
+  let expectedPayload;
 
-    const expectedPayload = {
+  beforeEach(async () => {
+    app = new App();
+    actions = await app.findActionsByKey('github');
+    action = actions[0];
+
+    expectedPayload = {
       description: action.description,
       key: action.key,
       name: action.name,
@@ -15,7 +21,9 @@ describe('actionSerializer', () => {
       showWebhookUrl: action.showWebhookUrl,
       type: action.type,
     };
+  });
 
+  it('should return the action data', () => {
     expect(actionSerializer(action)).toEqual(expectedPayload);
   });
 });

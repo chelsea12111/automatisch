@@ -1,4 +1,5 @@
 import defineAction from '../../../../helpers/define-action.js';
+import Joi from 'joi';
 
 export default defineAction({
   name: 'Send a Pushover Notification',
@@ -106,6 +107,25 @@ export default defineAction({
   ],
 
   async run($) {
+    const schema = Joi.object().keys({
+      title: Joi.string().allow(null, ''),
+      message: Joi.string().required(),
+      priority: Joi.number().valid(-2, -1, 0, 1, 2),
+      sound: Joi.string().allow(null, ''),
+      url: Joi.string().allow(null, ''),
+      urlTitle: Joi.string().allow(null, ''),
+      devices: Joi.array().items(
+        Joi.object().keys({
+          device: Joi.string().required(),
+        })
+      ),
+    });
+
+    const { error } = schema.validate($.step.parameters);
+    if (error) {
+      throw new Error(error.details[0].message);
+    }
+
     const { title, message, priority, sound, url, urlTitle } =
       $.step.parameters;
 
@@ -124,10 +144,13 @@ export default defineAction({
       device: allDevices,
     };
 
-    const { data } = await $.http.post('/1/messages.json', payload);
-
-    $.setActionItem({
-      raw: data,
-    });
+    try {
+      const { data } = await $.http.post('/1/messages.json', payload);
+      $.setActionItem({
+        raw: data,
+      });
+    } catch (error) {
+      throw new Error('Error while sending the notification');
+    }
   },
 });

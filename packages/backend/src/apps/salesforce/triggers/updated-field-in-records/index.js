@@ -1,10 +1,16 @@
-import defineTrigger from '../../../../helpers/define-trigger.js';
-import updatedFieldInRecords from './updated-field-in-records.js';
+import defineTrigger from '../../../../helpers/define-trigger';
+import updatedFieldInRecords from './updated-field-in-records';
 
-export default defineTrigger({
+type TriggerArguments = {
+  object: string;
+  field: string;
+};
+
+export default defineTrigger<TriggerArguments>({
   name: 'Updated field in records',
   key: 'updatedFieldInRecords',
   pollInterval: 15,
+  delay: 5000, // delay between polling intervals
   description: 'Triggers when a field is updated in a record.',
   arguments: [
     {
@@ -22,6 +28,9 @@ export default defineTrigger({
             value: 'listObjects',
           },
         ],
+        onError: (error) => {
+          $.log.error(`Error fetching objects: ${error}`);
+        },
       },
     },
     {
@@ -45,11 +54,19 @@ export default defineTrigger({
             value: '{parameters.object}',
           },
         ],
+        onError: (error) => {
+          $.log.error(`Error fetching fields for object ${parameters.object}: ${error}`);
+        },
       },
     },
   ],
 
-  async run($) {
-    await updatedFieldInRecords($);
+  async run($: TriggerContext, args: TriggerArguments) {
+    if (!args.object || !args.field) {
+      throw new Error('Invalid object or field value');
+    }
+
+    await updatedFieldInRecords($, args);
   },
 });
+

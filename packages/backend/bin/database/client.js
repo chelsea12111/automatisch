@@ -1,9 +1,10 @@
-import pg from 'pg';
+import { Pool } from 'pg';
 
-const client = new pg.Client({
+const pool = new Pool({
   host: 'localhost',
   user: 'postgres',
   port: 5432,
 });
 
-export default client;
+export default pool;
+

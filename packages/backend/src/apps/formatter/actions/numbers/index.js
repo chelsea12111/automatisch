@@ -1,9 +1,5 @@
 import defineAction from '../../../../helpers/define-action.js';
-
-import performMathOperation from './transformers/perform-math-operation.js';
-import randomNumber from './transformers/random-number.js';
-import formatNumber from './transformers/format-number.js';
-import formatPhoneNumber from './transformers/format-phone-number.js';
+import { performMathOperation, randomNumber, formatNumber, formatPhoneNumber } from './transformers';
 
 const transformers = {
   performMathOperation,
@@ -11,6 +7,8 @@ const transformers = {
   formatNumber,
   formatPhoneNumber,
 };
+
+$.validation.add('transform-key', value => Object.keys(transformers).includes(value));
 
 export default defineAction({
   name: 'Numbers',
@@ -49,7 +47,12 @@ export default defineAction({
 
   async run($) {
     const transformerName = $.step.parameters.transform;
-    const output = transformers[transformerName]($);
+
+    if (!transformerName || !transformers[transformerName]) {
+      throw new Error(`Invalid transformer: ${transformerName}`);
+    }
+
+    const output = transformers[transformerName]?.($);
 
     $.setActionItem({
       raw: {

@@ -1,7 +1,46 @@
+// Based on the GitLab Webhook events documentation:
 // https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#job-events
 
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  avatar_url: string;
+}
+
+interface Commit {
+  id: number;
+  name: string;
+  sha: string;
+  message: string;
+  author_name: string;
+  author_email: string;
+  status: string;
+  duration?: number | null;
+  started_at?: string | null;
+  finished_at?: string | null;
+}
+
+interface Repository {
+  name: string;
+  description: string;
+  homepage: string;
+  git_ssh_url: string;
+  git_http_url: string;
+  visibility_level: number;
+}
+
+interface Runner {
+  active: boolean;
+  runner_type: string;
+  is_shared: boolean;
+  id: number;
+  description: string;
+  tags: string[];
+}
+
 export default {
-  object_kind: 'build',
+  object_kind: 'build' as const, // using const assertions to make TypeScript infer the correct literal type
   ref: 'gitlab-script-trigger',
   tag: false,
   before_sha: '2293ada6b400935a1378653304eaf6221e0fdb8f',
@@ -27,7 +66,7 @@ export default {
     email: 'user@gitlab.com',
     avatar_url:
       'http://www.gravatar.com/avatar/e32bd13e2add097461cb96824b7a829c?s=80\u0026d=identicon',
-  },
+  } as User,
   commit: {
     id: 2366,
     name: 'Build pipeline',
@@ -39,7 +78,7 @@ export default {
     duration: null,
     started_at: null,
     finished_at: null,
-  },
+  } as Commit,
   repository: {
     name: 'gitlab_test',
     description: 'Atque in sunt eos similique dolores voluptatem.',
@@ -47,7 +86,7 @@ export default {
     git_ssh_url: 'git@192.168.64.1:gitlab-org/gitlab-test.git',
     git_http_url: 'http://192.168.64.1:3005/gitlab-org/gitlab-test.git',
     visibility_level: 20,
-  },
+  } as Repository,
   runner: {
     active: true,
     runner_type: 'project_type',
@@ -55,6 +94,6 @@ export default {
     id: 380987,
     description: 'shared-runners-manager-6.gitlab.com',
     tags: ['linux', 'docker'],
-  },
+  } as Runner,
   environment: null,
 };

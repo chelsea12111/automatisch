@@ -4,17 +4,16 @@ const useDefaultValue = [
     key: 'input',
     type: 'string',
     required: true,
-    description: 'Text you want to check whether it is empty or not.',
-    variables: true,
+    description: 'Text to check for emptiness.',
+    allowsVariables: true, // using more descriptive variable names
   },
   {
     label: 'Default Value',
     key: 'defaultValue',
     type: 'string',
     required: true,
-    description:
-      'Text that will be used as a default value if the input is empty.',
-    variables: true,
+    description: 'Default text if input is empty.',
+    allowsVariables: true,
   },
 ];
 

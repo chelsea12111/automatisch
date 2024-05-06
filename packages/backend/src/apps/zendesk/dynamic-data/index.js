@@ -1,20 +1,29 @@
-import listUsers from './list-users/index.js';
-import listBrands from './list-brands/index.js';
-import listFirstPageOfTickets from './list-first-page-of-tickets/index.js';
-import listGroups from './list-groups/index.js';
-import listOrganizations from './list-organizations/index.js';
-import listSharingAgreements from './list-sharing-agreements/index.js';
-import listTicketForms from './list-ticket-forms/index.js';
-import listViews from './list-views/index.js';
-
-export default [
-  listUsers,
-  listBrands,
-  listFirstPageOfTickets,
-  listGroups,
-  listOrganizations,
-  listSharingAgreements,
-  listFirstPageOfTickets,
-  listTicketForms,
-  listViews,
+// utils.js
+export const listModules = () => [
+  './list-users',
+  './list-brands',
+  './list-first-page-of-tickets',
+  './list-groups',
+  './list-organizations',
+  './list-sharing-agreements',
+  './list-ticket-forms',
+  './list-views'
 ];
+
+// index.js
+import { listModules } from './utils.js';
+
+const importModules = modulesList => modulesList.map(modulePath => {
+  // Dynamically import modules and return an array of imported modules
+  const [moduleName, extension] = modulePath.split('.');
+  return import(`../${modulePath}.js`).then(module => module[moduleName]);
+});
+
+export default importModules(listModules()).then(modules => {
+  // Return an object with named exports for better code readability
+  return modules.reduce((acc, module, index) => {
+    acc[`list${index + 1}`] = module;
+    return acc;
+  }, {});
+});
+

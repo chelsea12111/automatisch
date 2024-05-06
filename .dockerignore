@@ -1,12 +1,35 @@
-**/node_modules/
-**/dist/
-**/logs/
-**/.devcontainer
-**/.github
-**/.vscode
-**/.env
-**/.env.test
-**/.env.production
-**/yarn-error.log
-packages/docs
-packages/e2e-test
+# Ignore node modules and build artifacts
+/node_modules/
+/dist/
+/logs/
+/.devcontainer/
+/.github/
+/.vscode/
+/.env
+/.env.test
+/.env.production
+/yarn-error.log
+/packages/docs
+/packages/e2e-test
+
+# Ignore other files and directories
+*
+
+# Except these files and directories
+!.dockerignore
+!.gitignore
+!README.md
+!LICENSE
+!package.json
+!package-lock.json
+!yarn.lock
+!tsconfig.json
+!jest.config.js
+!vite.config.js
+!postcss.config.js
+!./src
+!./scripts
+!./tests
+!./examples
+!./interfaces
+!./types

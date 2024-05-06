@@ -3,20 +3,16 @@ export default {
   key: 'listChannels',
 
   async run($) {
-    const channels = {
-      data: [],
-      error: null,
-    };
-
-    const response = await $.http.get('/api/v4/users/me/channels'); // this endpoint will return only channels user joined, there is no endpoint to list all channels available for user
-
-    for (const channel of response.data) {
-      channels.data.push({
+    try {
+      const response = await $.http.get('/api/v4/users/me/channels');
+      const channels = response.data.map(channel => ({
         value: channel.id,
-        name: channel.display_name || channel.id, // it's possible for channel to not have any name thus falling back to using id
-      });
-    }
+        name: channel.display_name || channel.id,
+      }));
 
-    return channels;
+      return { data: channels, error: null };
+    } catch (error) {
+      return { data: [], error: error.message };
+    }
   },
 };

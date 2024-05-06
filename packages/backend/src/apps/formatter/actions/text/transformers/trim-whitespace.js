@@ -1,4 +1,6 @@
-const trimWhitespace = (input) => input.trim();
+// Use type annotations for better type safety
+const trimWhitespace = (input: string): string => input.trim();
 
-export default trimWhitespace;
+// Use named export for better code organization
+export { trimWhitespace };
 

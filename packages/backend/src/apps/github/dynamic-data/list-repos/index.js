@@ -4,9 +4,10 @@ export default {
   name: 'List repos',
   key: 'listRepos',
 
-  async run($) {
-    const firstPageRequest = $.http.get('/user/repos');
-    const response = await paginateAll($, firstPageRequest);
+  async run(context) {
+    const { $, http } = context;
+    const firstPageRequest = http.get('/user/repos');
+    const response = await paginateAll(context, firstPageRequest);
 
     response.data = response.data.map((repo) => {
       return {

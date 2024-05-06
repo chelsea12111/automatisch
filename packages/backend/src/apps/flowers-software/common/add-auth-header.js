@@ -1,16 +1,22 @@
-const addAuthHeader = ($, requestConfig) => {
-  const { data } = $.auth;
+const addAuthHeader = (axiosInstance, requestConfig) => {
+  const authData = axiosInstance.defaults.headers.common.Authorization;
 
-  if (data?.username && data.password && data.apiKey) {
-    requestConfig.headers['x-api-key'] = data.apiKey;
+  if (authData) {
+    const [type, credentials] = authData.split(' ');
 
-    requestConfig.auth = {
-      username: data.username,
-      password: data.password,
-    };
+    if (type === 'Basic' || type === 'Bearer') {
+      requestConfig.headers.Authorization = authData;
+    } else if (type === 'ApiKey') {
+      requestConfig.headers['x-api-key'] = credentials;
+    }
   }
 
   return requestConfig;
 };
 
-export default addAuthHeader;
+const axiosInstance = axios.create();
+axiosInstance.defaults.headers.common.Authorization =
+  'ApiKey ' + process.env.REACT_APP_API_KEY;
+
+export { addAuthHeader, axiosInstance };
+

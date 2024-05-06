@@ -1,13 +1,25 @@
-import nodemailer from 'nodemailer';
+import * as nodemailer from 'nodemailer';
 
-const transporter = ($) => {
+interface IAuthData {
+  host: string;
+  port: number;
+  useTls: boolean;
+  username: string;
+  password: string;
+}
+
+interface ITransporter {
+  (authData: IAuthData): nodemailer.Transporter;
+}
+
+const transporter: ITransporter = (authData) => {
   return nodemailer.createTransport({
-    host: $.auth.data.host,
-    port: $.auth.data.port,
-    secure: $.auth.data.useTls,
+    host: authData.host,
+    port: authData.port,
+    secure: authData.useTls,
     auth: {
-      user: $.auth.data.username,
-      pass: $.auth.data.password,
+      user: authData.username,
+      pass: authData.password,
     },
   });
 };

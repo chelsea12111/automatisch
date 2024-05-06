@@ -1,7 +1,10 @@
 import defineApp from '../../helpers/define-app.js';
 import addAuthHeader from './common/add-auth-header.js';
-import auth from './auth/index.js';
-import actions from './actions/index.js';
+import authConfig from './auth/index.js';
+import actionsConfig from './actions/index.js';
+
+const { auth, ...authRest } = authConfig;
+const { actions, ...actionsRest } = actionsConfig;
 
 export default defineApp({
   name: 'Remove.bg',
@@ -12,7 +15,15 @@ export default defineApp({
   baseUrl: 'https://www.remove.bg',
   apiBaseUrl: 'https://api.remove.bg/v1.0',
   primaryColor: '55636c',
-  beforeRequest: [addAuthHeader],
-  auth,
-  actions,
+  beforeRequest: [addAuthHeader, ...authRest.beforeRequest],
+  auth: {
+    ...auth,
+    test: async () => {
+      // Add any custom test logic here
+    },
+  },
+  actions: {
+    ...actions,
+    ...actionsRest.actions,
+  },
 });

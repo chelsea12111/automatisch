@@ -3,26 +3,19 @@ import defineAction from '../../../../helpers/define-action.js';
 export default defineAction({
   name: 'Create worksheet',
   key: 'createWorksheet',
-  description:
-    'Create a blank worksheet with a title. Optionally, provide headers.',
+  description: 'Create a blank worksheet with a title. Optionally, provide headers.',
   arguments: [
     {
       label: 'Drive',
       key: 'driveId',
       type: 'dropdown',
       required: false,
-      description:
-        'The Google Drive where your spreadsheet resides. If nothing is selected, then your personal Google Drive will be used.',
+      description: 'The Google Drive where your spreadsheet resides. If nothing is selected, then your personal Google Drive will be used.',
       variables: true,
       source: {
         type: 'query',
         name: 'getDynamicData',
-        arguments: [
-          {
-            name: 'key',
-            value: 'listDrives',
-          },
-        ],
+        arguments: [{ name: 'key', value: 'listDrives' }],
       },
     },
     {
@@ -36,14 +29,8 @@ export default defineAction({
         type: 'query',
         name: 'getDynamicData',
         arguments: [
-          {
-            name: 'key',
-            value: 'listSpreadsheets',
-          },
-          {
-            name: 'parameters.driveId',
-            value: '{parameters.driveId}',
-          },
+          { name: 'key', value: 'listSpreadsheets' },
+          { name: 'parameters.driveId', value: '{$parameters.driveId}' },
         ],
       },
     },
@@ -76,96 +63,99 @@ export default defineAction({
       type: 'dropdown',
       required: false,
       value: false,
-      description:
-        'If a worksheet with the specified title exists, its content would be lost. Please, use with caution.',
+      description: 'If a worksheet with the specified title exists, its content would be lost. Please, use with caution.',
       variables: true,
       options: [
         {
           label: 'Yes',
-          value: 'true',
+          value: true,
         },
         {
           label: 'No',
-          value: 'false',
+          value: false,
         },
       ],
     },
   ],
 
   async run($) {
-    const {
-      data: { sheets },
-    } = await $.http.get(`/v4/spreadsheets/${$.step.parameters.spreadsheetId}`);
+    try {
+      const spreadsheetInfo = await $.http.get(`/v4/spreadsheets/${$.step.parameters.spreadsheetId}`);
+      const { sheets } = spreadsheetInfo.data;
 
-    const selectedSheet = sheets.find(
-      (sheet) => sheet.properties.title === $.step.parameters.title
-    );
-    const headers = $.step.parameters.headers;
-    const values = headers.map((entry) => entry.header);
+      const selectedSheet = sheets.find(
+        (sheet) => sheet.properties.title === $.step.parameters.title
+      );
 
-    const body = {
-      requests: [
-        {
+      const headers = $.step.parameters.headers;
+      if (headers && headers.length > 0) {
+        const values = headers.map((entry) => entry.header);
+
+        const addSheetRequest = {
           addSheet: {
             properties: {
               title: $.step.parameters.title,
             },
           },
-        },
-      ],
-    };
+        };
 
-    if ($.step.parameters.overwrite === 'true' && selectedSheet) {
-      body.requests.unshift({
-        deleteSheet: {
-          sheetId: selectedSheet.properties.sheetId,
-        },
-      });
-    }
+        const body = {
+          requests: [addSheetRequest],
+        };
 
-    const { data } = await $.http.post(
-      `https://sheets.googleapis.com/v4/spreadsheets/${$.step.parameters.spreadsheetId}:batchUpdate`,
-      body
-    );
+        if ($.step.parameters.overwrite && selectedSheet) {
+          body.requests.unshift({
+            deleteSheet: {
+              sheetId: selectedSheet.properties.sheetId,
+            },
+          });
+        }
 
-    if (values.length) {
-      const body = {
-        requests: [
-          {
-            updateCells: {
-              rows: [
-                {
-                  values: values.map((header) => ({
-                    userEnteredValue: { stringValue: header },
-                  })),
-                },
-              ],
-              fields: '*',
-              start: {
-                sheetId:
-                  data.replies[data.replies.length - 1].addSheet.properties
-                    .sheetId,
-                rowIndex: 0,
-                columnIndex: 0,
+        const spreadsheetUpdateResponse = await $.http.post(
+          `https://sheets.googleapis.com/v4/spreadsheets/${$.step.parameters.spreadsheetId}:batchUpdate`,
+          body
+        );
+
+        const updateCellsRequest = {
+          updateCells: {
+            rows: [
+              {
+                values: values.map((header) => ({
+                  userEnteredValue: { stringValue: header },
+                })),
               },
+            ],
+            fields: '*',
+            start: {
+              sheetId:
+                spreadsheetUpdateResponse.data.replies[
+                  spreadsheetUpdateResponse.data.replies.length - 1
+                ].addSheet.properties.sheetId,
+              rowIndex: 0,
+              columnIndex: 0,
             },
           },
-        ],
-      };
+        };
 
-      const { data: response } = await $.http.post(
-        `https://sheets.googleapis.com/v4/spreadsheets/${$.step.parameters.spreadsheetId}:batchUpdate`,
-        body
-      );
+        await $.http.post(
+          `https://sheets.googleapis.com/v4/spreadsheets/${$.step.parameters.spreadsheetId}:batchUpdate`,
+          { requests: [updateCellsRequest] }
+        );
+
+        $.setActionItem({
+          raw: spreadsheetUpdateResponse,
+        });
+        return;
+      }
 
       $.setActionItem({
-        raw: response,
+        raw: spreadsheetInfo,
       });
-      return;
+    } catch (error) {
+      $.log(error);
+      $.setActionItem({
+        raw: error.response,
+      });
     }
-
-    $.setActionItem({
-      raw: data,
-    });
   },
 });

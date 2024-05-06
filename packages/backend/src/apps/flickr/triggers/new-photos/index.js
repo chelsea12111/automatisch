@@ -1,7 +1,7 @@
 // Import the necessary modules and functions
 import defineTrigger from '../../../../helpers/define-trigger.js';
 import newPhotos from './new-photos.js';
-import { log } from '../../../../helpers/utils.js';
+import { logError } from '../../../../helpers/utils.js';
 
 // Define the trigger with better configuration and error handling
 export default defineTrigger({
@@ -10,7 +10,7 @@ export default defineTrigger({
   key: 'newPhotos',
   description: 'Triggers when a new photo is added.',
   onError: (error, $) => {
-    log.error(`Error in new photos trigger: ${error.message}`, $);
+    logError(`Error in new photos trigger: ${error.message}`, $, error);
   },
 
   // Run the trigger function
@@ -23,3 +23,8 @@ export default defineTrigger({
     }
   },
 });
+
+// Separate the log error function for better readability
+const logError = (message, $, error) => {
+  log.error(`${message} \n$, ${JSON.stringify($, null, 2)} \nError: ${error.stack}`);
+};

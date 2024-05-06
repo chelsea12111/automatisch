@@ -1,4 +1,7 @@
-import newCalendar from './new-calendar/index.js';
-import newEvent from './new-event/index.js';
+// import the default export from each module
+import Calendar from './new-calendar/index.js';
+import Event from './new-event/index.js';
 
-export default [newCalendar, newEvent];
+// re-export them as an array using named exports
+export { Calendar, Event };
+

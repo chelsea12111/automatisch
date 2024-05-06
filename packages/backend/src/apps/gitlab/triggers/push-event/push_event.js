@@ -1,8 +1,8 @@
 // https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#push-events
 
 export default {
-  object_kind: 'push',
-  event_name: 'push',
+  object_kind: 'push' as const,
+  event_name: 'push' as const,
   before: '95790bf891e76fee5e1747ab589903a6a1f80f22',
   after: 'da1560886d4f094c3e6c9ef40349f7d38b5d27d7',
   ref: 'refs/heads/master',
@@ -12,7 +12,7 @@ export default {
   user_username: 'jsmith',
   user_email: 'john@example.com',
   user_avatar:
-    'https://s.gravatar.com/avatar/d4c74594d841139328695756648b6bd6?s=8://s.gravatar.com/avatar/d4c74594d841139328695756648b6bd6?s=80',
+    'https://s.gravatar.com/avatar/d4c74594d841139328695756648b6bd6?s=80',
   project_id: 15,
   project: {
     id: 15,
@@ -48,10 +48,13 @@ export default {
       title: 'Update Catalan translation to e38cb41.',
       timestamp: '2011-12-12T14:27:31+02:00',
       url: 'http://example.com/mike/diaspora/commit/b6568db1bc1dcd7f8b4d5a946b0b91f9dacd7327',
+      created_at: '2011-12-12T14:27:31+02:00',
       author: {
         name: 'Jordi Mallach',
         email: 'jordi@softcatala.org',
       },
+      author_avatar_url:
+        'https://s.gravatar.com/avatar/d4c74594d841139328695756648b6bd6?s=80',
       added: ['CHANGELOG'],
       modified: ['app/controller/application.rb'],
       removed: [],
@@ -62,10 +65,13 @@ export default {
       title: 'fixed readme',
       timestamp: '2012-01-03T23:36:29+02:00',
       url: 'http://example.com/mike/diaspora/commit/da1560886d4f094c3e6c9ef40349f7d38b5d27d7',
+      created_at: '2012-01-03T23:36:29+02:00',
       author: {
         name: 'GitLab dev user',
         email: 'gitlabdev@dv6700.(none)',
       },
+      author_avatar_url:
+        'https://s.gravatar.com/avatar/d4c74594d841139328695756648b6bd6?s=80',
       added: ['CHANGELOG'],
       modified: ['app/controller/application.rb'],
       removed: [],
@@ -73,3 +79,4 @@ export default {
   ],
   total_commits_count: 4,
 };
+

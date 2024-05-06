@@ -25,28 +25,33 @@ const newPhotosInAlbum = async ($) => {
   let pages = 1;
 
   do {
-    const params = {
-      page,
-      per_page: 11,
-      user_id: $.auth.data.userId,
-      extras: extraFields,
-      photoset_id: $.step.parameters.album,
-      method: 'flickr.photosets.getPhotos',
-      format: 'json',
-      nojsoncallback: 1,
-    };
-    const response = await $.http.get('/rest', { params });
-    const photoset = response.data.photoset;
-    page = photoset.page + 1;
-    pages = photoset.pages;
+    try {
+      const params = {
+        page,
+        per_page: 11,
+        user_id: $.auth.data.userId,
+        extras: extraFields,
+        photoset_id: $.step.parameters.album,
+        method: 'flickr.photosets.getPhotos',
+        format: 'json',
+        nojsoncallback: 1,
+      };
+      const response = await $.http.get('/rest', { params });
+      const { photoset } = response.data;
+      page = photoset.page + 1;
+      pages = photoset.pages;
 
-    for (const photo of photoset.photo) {
-      $.pushTriggerItem({
-        raw: photo,
-        meta: {
-          internalId: photo.id,
-        },
-      });
+      for (const photo of photoset.photo) {
+        console.log(`Processing photo ${photo.id}`);
+        $.pushTriggerItem({
+          raw: photo,
+          meta: {
+            internalId: photo.id,
+          },
+        });
+      }
+    } catch (error) {
+      console.error(`Error fetching photos: ${error.message}`);
     }
   } while (page <= pages);
 };

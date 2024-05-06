@@ -1,10 +1,10 @@
 import defineApp from '../../helpers/define-app.js';
 import addAuthHeader from './common/add-auth-header.js';
-import auth from './auth/index.js';
-import dynamicData from './dynamic-data/index.js';
-import actions from './actions/index.js';
-import triggers from './triggers/index.js';
-import dynamicFields from './dynamic-fields/index.js';
+import { authConfig } from './auth/index.js';
+import { dynamicDataConfig } from './dynamic-data/index.js';
+import { actionsConfig } from './actions/index.js';
+import { triggersConfig } from './triggers/index.js';
+import { dynamicFieldsConfig } from './dynamic-fields/index.js';
 
 export default defineApp({
   name: 'Discord',
@@ -16,9 +16,9 @@ export default defineApp({
   apiBaseUrl: 'https://discord.com/api',
   primaryColor: '5865f2',
   beforeRequest: [addAuthHeader],
-  auth,
-  dynamicData,
-  dynamicFields,
-  triggers,
-  actions,
+  ...authConfig,
+  ...dynamicDataConfig,
+  ...dynamicFieldsConfig,
+  ...triggersConfig,
+  ...actionsConfig,
 });

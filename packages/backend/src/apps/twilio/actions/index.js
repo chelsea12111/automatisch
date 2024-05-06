@@ -1,3 +1,8 @@
-import sendSms from './send-sms/index.js';
+// Import the sendSms function from the send-sms module
+import sendSms from './send-sms.js';
 
-export default [sendSms];
+// Export an object with the sendSms function as a property
+export default {
+  sendSms,
+};
+

@@ -1,35 +1,40 @@
+import axios from 'axios';
+
 export default {
   name: 'List forums',
   key: 'listForums',
 
-  async run($) {
+  async run() {
     const forums = {
       data: [],
     };
 
-    const params = {
-      limit: 100,
-      order: 'desc',
-      cursor: undefined,
-    };
+    let cursor = undefined;
+    let hasNext;
 
-    let more;
     do {
-      const { data } = await $.http.get('/3.0/users/listForums.json', {
+      const params = {
+        limit: 100,
+        order: 'desc',
+        cursor,
+      };
+
+      const { data: responseData } = await axios.get('/3.0/users/listForums.json', {
         params,
       });
-      params.cursor = data.cursor.next;
-      more = data.cursor.hasNext;
 
-      if (data.response?.length) {
-        for (const forum of data.response) {
+      cursor = responseData.cursor?.next;
+      hasNext = responseData.cursor?.hasNext;
+
+      if (responseData.response?.length) {
+        for (const forum of responseData.response) {
           forums.data.push({
             value: forum.id,
             name: forum.id,
           });
         }
       }
-    } while (more);
+    } while (hasNext);
 
     return forums;
   },

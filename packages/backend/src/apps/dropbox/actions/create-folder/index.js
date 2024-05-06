@@ -27,14 +27,28 @@ export default defineAction({
   ],
 
   async run($) {
-    const parentFolder = $.step.parameters.parentFolder;
-    const folderName = $.step.parameters.folderName;
+    const parentFolder = $.step.parameters.parentFolder.trim();
+    const folderName = $.step.parameters.folderName.trim();
+
+    if (!parentFolder || !folderName) {
+      throw new Error('Parent folder and folder name are required.');
+    }
+
     const folderPath = path.join(parentFolder, folderName);
 
-    const response = await $.http.post('/2/files/create_folder_v2', {
-      path: folderPath,
-    });
+    try {
+      const response = await $.http.post('/2/files/create_folder_v2', {
+        path: folderPath,
+      });
 
-    $.setActionItem({ raw: response.data });
+      if (!response.ok) {
+        throw new Error(`Error creating folder: ${response.statusText}`);
+      }
+
+      $.setActionItem({ raw: response.data });
+    } catch (error) {
+      $.log(`Error: ${error.message}`);
+      throw error;
+    }
   },
 });

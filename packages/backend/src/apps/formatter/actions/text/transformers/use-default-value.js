@@ -1,11 +1,12 @@
-const useDefaultValue = ($) => {
-  const input = $.step.parameters.input;
-
-  if (input && input.trim().length > 0) {
-    return input;
+const useDefaultValue = ({$step: {parameters: {input, defaultValue}}}) => {
+  if (input) {
+    input = input.trim();
+    if (input.length > 0) {
+      return input;
+    }
   }
 
-  return $.step.parameters.defaultValue;
+  return defaultValue;
 };
 
 export default useDefaultValue;

@@ -5,15 +5,28 @@ const verifyCredentials = async ($) => {
     code: $.auth.data.code,
     grant_type: 'authorization_code',
   };
-  const { data } = await $.http.post('/v3/oauth/token', null, { params });
 
-  await $.auth.set({
-    accessToken: data.access_token,
-    refreshToken: data.refresh_token,
-    tokenType: data.token_type,
-    athleteId: data.athlete.id,
-    screenName: `${data.athlete.firstname} ${data.athlete.lastname}`,
-  });
+  try {
+    const {
+      data: {
+        access_token,
+        refresh_token,
+        token_type,
+        athlete: { id: athleteId, firstname: firstname, lastname: lastname },
+      },
+    } = await $.http.post('/v3/oauth/token', null, { params });
+
+    $.auth.set({
+      accessToken: access_token,
+      refreshToken: refresh_token,
+      tokenType: token_type,
+      athleteId,
+      screenName: `${firstname} ${lastname}`,
+    });
+  } catch (error) {
+    // Handle any errors that occur during the execution of the function
+    console.error(error);
+  }
 };
 
 export default verifyCredentials;

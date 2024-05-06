@@ -14,21 +14,28 @@ const newFiles = async ($) => {
     params.corpora = 'drive';
   }
 
-  do {
-    const { data } = await $.http.get('/v3/files', { params });
-    params.pageToken = data.nextPageToken;
+  let pageToken;
 
-    if (data.files?.length) {
-      for (const file of data.files) {
-        $.pushTriggerItem({
-          raw: file,
-          meta: {
-            internalId: file.id,
-          },
-        });
+  do {
+    try {
+      const { data } = await $.http.get('/v3/files', { params });
+      pageToken = data.nextPageToken;
+
+      if (data.files) {
+        for (const file of data.files) {
+          $.pushTriggerItem({
+            raw: file,
+            meta: {
+              internalId: file.id,
+            },
+          });
+        }
       }
+    } catch (error) {
+      // Handle errors here
+      console.error(error);
     }
-  } while (params.pageToken);
+  } while (pageToken);
 };
 
 export default newFiles;

@@ -1,35 +1,52 @@
+import { HttpResponse } from './httpResponse';
+
 export default {
   name: 'List board labels',
   key: 'listBoardLabels',
 
-  async run($) {
-    const boardLabels = {
-      data: [],
-    };
-
-    const boardId = $.step.parameters.boardId;
-
+  async run($, { boardId }: { boardId: string }): Promise<HttpResponse> {
     if (!boardId) {
-      return boardLabels;
+      return {
+        data: {
+          data: [],
+        },
+        status: 200,
+      };
     }
 
-    const params = {
-      fields: 'color',
-    };
+    try {
+      const params = {
+        fields: 'color,name',
+      };
 
-    const { data } = await $.http.get(`/1/boards/${boardId}/labels`, {
-      params,
-    });
+      const { data } = await $.http.get(`/1/boards/${boardId}/labels`, {
+        params,
+      });
 
-    if (data?.length) {
-      for (const boardLabel of data) {
-        boardLabels.data.push({
-          value: boardLabel.id,
-          name: boardLabel.color,
-        });
+      if (Array.isArray(data)) {
+        const boardLabels = {
+          data: data.map((boardLabel: any) => ({
+            value: boardLabel.id,
+            name: boardLabel.name,
+            color: boardLabel.color,
+          })),
+        };
+
+        return {
+          data: boardLabels,
+          status: 200,
+        };
+      } else {
+        throw new Error('Invalid data received from the API.');
       }
+    } catch (error) {
+      return {
+        data: {
+          data: [],
+        },
+        status: 500,
+        error: error.message,
+      };
     }
-
-    return boardLabels;
   },
 };

@@ -5,7 +5,8 @@ import * as Sentry from './helpers/sentry.ee.js';
 import appAssetsHandler from './helpers/app-assets-handler.js';
 import errorHandler from './helpers/error-handler.js';
 import { orm } from './config/orm.js';
-import { createBullBoardHandler, serverAdapter } from './helpers/create-bull-board-handler.js';
+import { createBullBoard, BullAdapter } from 'bull-board';
+import { registerAdapter } from 'bull-board/registerAdapter';
 import configurePassport from './helpers/passport.js';
 import router from './routes/index.js';
 
@@ -26,6 +27,9 @@ const jsonParser = express.json({
   verify: (req, res, buf) => {
     req.rawBody = buf;
   },
+}).on('error', (err, req, res) => {
+  console.error(err);
+  res.status(500).send('Error parsing JSON');
 });
 
 const urlencodedParser = express.urlencoded({
@@ -34,6 +38,9 @@ const urlencodedParser = express.urlencoded({
   verify: (req, res, buf) => {
     req.rawBody = buf;
   },
+}).on('error', (err, req, res) => {
+  console.error(err);
+  res.status(500).send('Error parsing URL-encoded data');
 });
 
 app.use(jsonParser);
@@ -45,20 +52,22 @@ configurePassport(app);
 
 app.use('/', router);
 
-createBullBoardHandler(serverAdapter);
+const serverAdapter = new BullAdapter();
+createBullBoard(serverAdapter);
+registerAdapter(serverAdapter);
 injectBullBoardHandler(app, serverAdapter);
 
 appAssetsHandler(app);
 
-webUIHandler(app);
+const noMatchHandler = (req, res) => {
+  res.status(404).send('Page not found');
+};
 
-// catch 404 and forward to error handler
-app.use(function (req, res, next) {
-  next(createError(404));
-});
+app.use(noMatchHandler);
 
 Sentry.attachErrorHandler(app);
 
 app.use(errorHandler);
 
 export default app;
+

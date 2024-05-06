@@ -1,15 +1,16 @@
 import { URLSearchParams } from 'url';
 
-export default async function generateAuthUrl($) {
+export default async function generateAuthUrl({ auth: { data: { clientId } }, app: { baseUrl } }) {
   const scopes = ['data:read_write'];
   const searchParams = new URLSearchParams({
-    client_id: $.auth.data.clientId,
+    client_id: clientId,
     scope: scopes.join(','),
   });
 
-  const url = `${$.app.baseUrl}/oauth/authorize?${searchParams.toString()}`;
+  const authUrl = `${baseUrl}/oauth/authorize?${searchParams.toString()}`;
 
   await $.auth.set({
-    url,
+    authUrl,
   });
 }
+

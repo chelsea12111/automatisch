@@ -6,6 +6,11 @@ const newPullRequests = async ($) => {
 
   if (!repoParameter) throw new Error('A repo must be set!');
 
+  const repoParts = repoParameter.split('/');
+  if (repoParts.length !== 2) {
+    throw new Error('Invalid repo format. Should be in owner/repo format.');
+  }
+
   const { repoOwner, repo } = getRepoOwnerAndRepo(repoParameter);
 
   const pathname = `/repos/${repoOwner}/${repo}/pulls`;
@@ -16,9 +21,13 @@ const newPullRequests = async ($) => {
     per_page: 100,
   };
 
-  let links;
+  let response, links;
   do {
-    const response = await $.http.get(pathname, { params });
+    response = await $.http.get(pathname, { params });
+    if (response === undefined || response === null) {
+      throw new Error('Error fetching pull requests.');
+    }
+
     links = parseLinkHeader(response.headers.link);
 
     if (response.data.length) {
@@ -32,10 +41,10 @@ const newPullRequests = async ($) => {
           },
         };
 
-        $.pushTriggerItem(dataItem);
+        await $.pushTriggerItem(dataItem);
       }
     }
-  } while (links.next);
+  } while (links && links.next);
 };
 
 export default newPullRequests;

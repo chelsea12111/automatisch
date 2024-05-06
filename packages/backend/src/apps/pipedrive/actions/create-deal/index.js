@@ -2,16 +2,16 @@ import defineAction from '../../../../helpers/define-action.js';
 import { filterProvidedFields } from '../../common/filter-provided-fields.js';
 
 export default defineAction({
-  name: 'Create deal',
+  name: 'Create Deal',
   key: 'createDeal',
-  description: 'Creates a new deal.',
+  description: 'Creates a new deal with the provided details.',
   arguments: [
     {
       label: 'Title',
       key: 'title',
       type: 'string',
       required: true,
-      description: '',
+      description: 'The title of the deal.',
       variables: true,
     },
     {
@@ -20,7 +20,7 @@ export default defineAction({
       type: 'string',
       required: false,
       description:
-        'Requires admin access to Pipedrive account. Format: YYYY-MM-DD HH:MM:SS',
+        'The creation date and time of the deal in the format YYYY-MM-DD HH:MM:SS. Requires admin access to Pipedrive account.',
       variables: true,
     },
     {
@@ -28,7 +28,7 @@ export default defineAction({
       key: 'status',
       type: 'dropdown',
       required: false,
-      description: '',
+      description: 'The status of the deal.',
       options: [
         {
           label: 'Open',
@@ -47,13 +47,14 @@ export default defineAction({
           value: 'deleted',
         },
       ],
+      variables: true,
     },
     {
       label: 'Lost Reason',
       key: 'lostReason',
       type: 'string',
       required: false,
-      description: '',
+      description: 'The reason why the deal was lost.',
       variables: true,
     },
     {
@@ -61,9 +62,8 @@ export default defineAction({
       key: 'stageId',
       type: 'dropdown',
       required: false,
-      value: '1',
       description:
-        'The ID of the stage this deal will be added to. If omitted, the deal will be placed in the first stage of the default pipeline.',
+        'The ID of the stage to add the deal to. If omitted, the deal will be placed in the first stage of the default pipeline.',
       variables: true,
       source: {
         type: 'query',
@@ -81,8 +81,7 @@ export default defineAction({
       key: 'userId',
       type: 'dropdown',
       required: false,
-      description:
-        'Select user who will be marked as the owner of this deal. If omitted, the authorized user will be used.',
+      description: 'The user who will be marked as the owner of this deal.',
       variables: true,
       source: {
         type: 'query',
@@ -100,7 +99,7 @@ export default defineAction({
       key: 'organizationId',
       type: 'dropdown',
       required: false,
-      description: 'Organization this deal will be associated with.',
+      description: 'The organization associated with this deal.',
       variables: true,
       source: {
         type: 'query',
@@ -118,7 +117,7 @@ export default defineAction({
       key: 'personId',
       type: 'dropdown',
       required: false,
-      description: 'Person this deal will be associated with.',
+      description: 'The person associated with this deal.',
       variables: true,
       source: {
         type: 'query',
@@ -146,7 +145,7 @@ export default defineAction({
       type: 'string',
       required: false,
       description:
-        'The expected close date of the deal. In ISO 8601 format: YYYY-MM-DD.',
+        'The expected close date of the deal in the format YYYY-MM-DD.',
       variables: true,
     },
     {
@@ -154,7 +153,7 @@ export default defineAction({
       key: 'value',
       type: 'string',
       required: false,
-      description: 'The value of the deal. If omitted, value will be set to 0.',
+      description: 'The value of the deal.',
       variables: true,
     },
     {
@@ -196,17 +195,17 @@ export default defineAction({
 
     const fields = {
       title: title,
-      value: value,
+      value: value || '0',
       add_time: addTime,
-      status: status,
+      status: status || 'open',
       lost_reason: lostReason,
       stage_id: stageId,
       user_id: userId,
       org_id: organizationId,
       person_id: personId,
-      probability: probability,
+      probability: probability || '0',
       expected_close_date: expectedCloseDate,
-      currency: currency,
+      currency: currency || 'USD',
     };
 
     const body = filterProvidedFields(fields);

@@ -6,7 +6,7 @@ export default defineTrigger({
   key: 'updatedFiles',
   pollInterval: 15,
   description:
-    'Triggers when a file is updated in a specific folder (but not its subfolder).',
+    'Triggers when a file is updated in a specific folder (but not its subfolders).',
   arguments: [
     {
       label: 'Drive',
@@ -32,6 +32,7 @@ export default defineTrigger({
       key: 'folderId',
       type: 'dropdown',
       required: false,
+      defaultValue: 'root',
       dependsOn: ['parameters.driveId'],
       description:
         'Check a specific folder for updated files. Please note: files located in subfolders of the folder you choose here will NOT trigger this flow. Defaults to the top-level folder if none is picked.',
@@ -48,6 +49,9 @@ export default defineTrigger({
             value: '{parameters.driveId}',
           },
         ],
+        errorHandler: (_, error) => {
+          $.context.log.error('Error while listing folders:', error);
+        },
       },
     },
     {
@@ -71,6 +75,18 @@ export default defineTrigger({
   ],
 
   async run($) {
-    await updatedFiles($);
+    const driveId = ${$.parameters.driveId};
+    const folderId = ${$.parameters.folderId};
+    const includeDeleted = ${$.parameters.includeDeleted};
+
+    if (!driveId) {
+      $.context.log.warn('No drive ID provided, using the personal Google Drive.');
+    }
+
+    if (!folderId) {
+      $.context.log.warn('No folder ID provided, checking the top-level folder.');
+    }
+
+    await updatedFiles($, driveId, folderId, includeDeleted);
   },
 });

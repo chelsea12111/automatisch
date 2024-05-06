@@ -1,7 +1,6 @@
 import pluralizeLibrary from 'pluralize';
 
-const pluralize = ($) => {
-  const input = $.step.parameters.input;
+const pluralize = (input) => {
   return pluralizeLibrary(input);
 };
 

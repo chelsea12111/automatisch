@@ -1,5 +1,3 @@
-import defineTrigger from '../../../../helpers/define-trigger.js';
-import { GITLAB_EVENT_TYPE } from '../types.js';
 import {
   getRegisterHookFn,
   getRunFn,
@@ -7,8 +5,9 @@ import {
   projectArgumentDescriptor,
   unregisterHook,
 } from '../lib.js';
-
+import defineTrigger from '../../../../helpers/define-trigger.js';
 import data from './pipeline_event.js';
+import { GITLAB_EVENT_TYPE } from '../types.js';
 
 export const triggerDescriptor = {
   name: 'Pipeline event',

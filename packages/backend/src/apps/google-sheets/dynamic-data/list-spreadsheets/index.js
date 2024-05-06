@@ -1,3 +1,5 @@
+import { get } from 'lodash';
+
 export default {
   name: 'List spreadsheets',
   key: 'listSpreadsheets',
@@ -12,29 +14,40 @@ export default {
       pageSize: 100,
       pageToken: undefined,
       orderBy: 'createdTime desc',
-      driveId: $.step.parameters.driveId,
+      driveId: get($.step.parameters, 'driveId', undefined),
       supportsAllDrives: true,
     };
 
-    if ($.step.parameters.driveId) {
+    // Validate driveId parameter
+    if (params.driveId) {
+      if (typeof params.driveId !== 'string') {
+        throw new Error('Invalid driveId parameter. Expected a string.');
+      }
+
       params.includeItemsFromAllDrives = true;
       params.corpora = 'drive';
     }
 
     do {
-      const { data } = await $.http.get(
-        `https://www.googleapis.com/drive/v3/files`,
-        { params }
-      );
-      params.pageToken = data.nextPageToken;
+      try {
+        const { data } = await $.http.get(
+          `https://www.googleapis.com/drive/v3/files`,
+          { params }
+        );
 
-      if (data.files?.length) {
-        for (const file of data.files) {
-          spreadsheets.data.push({
-            value: file.id,
-            name: file.name,
-          });
+        if (data.files?.length) {
+          for (const file of data.files) {
+            spreadsheets.data.push({
+              value: file.id,
+              name: file.name,
+            });
+          }
         }
+
+        params.pageToken = data.nextPageToken;
+      } catch (error) {
+        $.log('Error fetching spreadsheets:', error);
+        break;
       }
     } while (params.pageToken);
 

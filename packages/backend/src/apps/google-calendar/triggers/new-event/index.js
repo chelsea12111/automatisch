@@ -27,28 +27,33 @@ export default defineTrigger({
   ],
 
   async run($) {
-    const calendarId = $.step.parameters.calendarId;
+    const calendarId = $.step.parameters.calendarId ?? '';
 
-    const params = {
+    let params = {
       pageToken: undefined,
       orderBy: 'updated',
     };
 
     do {
-      const { data } = await $.http.get(`/v3/calendars/${calendarId}/events`, {
-        params,
-      });
-      params.pageToken = data.nextPageToken;
+      try {
+        const { data } = await $.http.get(`/v3/calendars/${calendarId}/events`, {
+          params,
+        });
 
-      if (data.items?.length) {
-        for (const event of data.items.reverse()) {
-          $.pushTriggerItem({
-            raw: event,
-            meta: {
-              internalId: event.etag,
-            },
-          });
+        params.pageToken = data.nextPageToken ?? '';
+
+        if (data.items?.length) {
+          for (const event of data.items.reverse()) {
+            $.pushTriggerItem({
+              raw: event,
+              meta: {
+                internalId: event.etag,
+              },
+            });
+          }
         }
+      } catch (error) {
+        $.log(`Error fetching events: ${error.message}`);
       }
     } while (params.pageToken);
   },

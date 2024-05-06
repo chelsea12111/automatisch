@@ -1,4 +1,12 @@
-import listFolders from './list-folders/index.js';
-import listDrives from './list-drives/index.js';
+// utils.js
 
-export default [listFolders, listDrives];
+const listFolders = require('./list-folders/index.js');
+const listDrives = require('./list-drives/index.js');
+
+const utils = {
+  listFolders,
+  listDrives,
+};
+
+module.exports = utils;
+

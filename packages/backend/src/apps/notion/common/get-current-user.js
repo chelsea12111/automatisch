@@ -1,9 +1,22 @@
-const getCurrentUser = async ($) => {
-  const userId = $.auth.data.owner.user.id;
-  const response = await $.http.get(`/v1/users/${userId}`);
+const getCurrentUser = async ({ auth }) => {
+  if (!auth || !auth.data || !auth.data.owner || !auth.data.owner.user || !auth.data.owner.user.id) {
+    throw new Error('Unauthorized: missing or invalid authentication data');
+  }
 
-  const currentUser = response.data;
+  const response = await fetch(`/v1/users/${auth.data.owner.user.id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch current user: ${response.statusText}`);
+  }
+
+  const currentUser = await response.json();
   return currentUser;
 };
 
 export default getCurrentUser;
+

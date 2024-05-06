@@ -1,3 +1,5 @@
+import type { HttpClient, TriggerItem } from '$lib';
+
 const extraFields = [
   'description',
   'license',
@@ -26,7 +28,12 @@ const extraFields = [
   'url_o',
 ].join(',');
 
-const newPhotos = async ($) => {
+interface Photo {
+  date_faved: string;
+  // add other properties as needed
+}
+
+const newPhotos = async ($, auth: { data: { userId: string } }, http: HttpClient) => {
   let page = 1;
   let pages = 1;
 
@@ -34,24 +41,55 @@ const newPhotos = async ($) => {
     const params = {
       page,
       per_page: 500,
-      user_id: $.auth.data.userId,
+      user_id: auth.data.userId,
       extras: extraFields,
       method: 'flickr.favorites.getList',
       format: 'json',
       nojsoncallback: 1,
     };
-    const response = await $.http.get('/rest', { params });
-    const photos = response.data.photos;
-    page = photos.page + 1;
-    pages = photos.pages;
 
-    for (const photo of photos.photo) {
-      $.pushTriggerItem({
-        raw: photo,
-        meta: {
-          internalId: photo.date_faved,
-        },
-      });
+    try {
+      const response = await http.get('/rest', { params });
+      const photos: { photo: Photo[]; page: number; pages: number } = response.data;
+      page = photos.page + 1;
+      pages = photos.pages;
+
+      for (const photo of photos.photo) {
+        const {
+          id,
+          owner,
+          secret,
+          server,
+          farm,
+          title,
+          ispublic,
+          isfriend,
+          isfamily,
+          dateupload,
+          datefaved,
+          // add other properties as needed
+        } = photo;
+
+        $.pushTriggerItem({
+          raw: photo,
+          meta: {
+            internalId: datefaved,
+            id,
+            owner,
+            secret,
+            server,
+            farm,
+            title,
+            ispublic,
+            isfriend,
+            isfamily,
+            dateupload,
+            // add other properties as needed
+          },
+        } as TriggerItem<Photo>);
+      }
+    } catch (error) {
+      console.error('Error fetching photos:', error);
     }
   } while (page <= pages);
 };

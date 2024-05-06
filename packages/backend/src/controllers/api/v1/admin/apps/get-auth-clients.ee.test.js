@@ -1,9 +1,8 @@
-import { vi, describe, it, expect, beforeEach } from 'vitest';
-import request from 'supertest';
+import { request } from 'supertest';
 import app from '../../../../../app.js';
 import createAuthTokenByUserId from '../../../../../helpers/create-auth-token-by-user-id.js';
-import { createUser } from '../../../../../../test/factories/user.js';
-import { createRole } from '../../../../../../test/factories/role.js';
+import { createUser, createRole } from '../../../../../../test/factories/user.js';
+import { createRole as createAppRole } from '../../../../../../test/factories/app-role.js';
 import getAuthClientsMock from '../../../../../../test/mocks/rest/api/v1/admin/apps/get-auth-clients.js';
 import { createAppAuthClient } from '../../../../../../test/factories/app-auth-client.js';
 import * as license from '../../../../../helpers/license.ee.js';
@@ -11,13 +10,17 @@ import * as license from '../../../../../helpers/license.ee.js';
 describe('GET /api/v1/admin/apps/:appKey/auth-clients', () => {
   let currentUser, adminRole, token;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     vi.spyOn(license, 'hasValidLicense').mockResolvedValue(true);
 
     adminRole = await createRole({ key: 'admin' });
     currentUser = await createUser({ roleId: adminRole.id });
 
     token = await createAuthTokenByUserId(currentUser.id);
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
   });
 
   it('should return specified app auth client info', async () => {
@@ -40,5 +43,18 @@ describe('GET /api/v1/admin/apps/:appKey/auth-clients', () => {
     ]);
 
     expect(response.body).toEqual(expectedPayload);
+  });
+
+  it('should return 401 for unauthorized access', async () => {
+    await request(app)
+      .get('/api/v1/admin/apps/deepl/auth-clients')
+      .expect(401);
+  });
+
+  it('should return 404 for invalid appKey', async () => {
+    await request(app)
+      .get('/api/v1/admin/apps/invalid/auth-clients')
+      .set('Authorization', token)
+      .expect(404);
   });
 });

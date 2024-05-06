@@ -6,47 +6,38 @@ import Checkbox from '@mui/material/Checkbox';
 function ControlledCheckbox(props) {
   const { control } = useFormContext();
   const {
-    required,
     name,
     defaultValue = false,
     disabled = false,
     onBlur,
     onChange,
     dataTest,
+    required,
     ...checkboxProps
   } = props;
+
   return (
     <Controller
-      rules={{ required }}
       name={name}
       defaultValue={defaultValue}
       control={control}
-      render={({
-        field: {
-          ref,
-          onChange: controllerOnChange,
-          onBlur: controllerOnBlur,
-          value,
-          name,
-          ...field
-        },
-      }) => {
+      rules={{ required }}
+      render={({ field: { onChange: controllerOnChange, value, ...field } }) => {
         return (
           <Checkbox
             {...checkboxProps}
             {...field}
             checked={!!value}
-            name={name}
             disabled={disabled}
-            onChange={(...args) => {
-              controllerOnChange(...args);
-              onChange?.(...args);
+            onChange={(event) => {
+              controllerOnChange(event.target.checked);
+              onChange?.(event);
             }}
-            onBlur={(...args) => {
-              controllerOnBlur();
-              onBlur?.(...args);
+            onBlur={(event) => {
+              controllerOnBlur(event);
+              onBlur?.(event);
             }}
-            inputRef={ref}
+            inputRef={field.ref}
             data-test={dataTest}
           />
         );

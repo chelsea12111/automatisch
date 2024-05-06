@@ -1,7 +1,7 @@
 import oauthClient from './oauth-client.js';
 
-const addAuthHeader = ($, requestConfig) => {
-  const { url, method, data, params } = requestConfig;
+const addAuthHeader = ($) => (requestConfig) => {
+  const { url, method, data, params, baseURL } = requestConfig;
 
   const token = {
     key: $.auth.data?.accessToken,
@@ -9,16 +9,16 @@ const addAuthHeader = ($, requestConfig) => {
   };
 
   const requestData = {
-    url: `${requestConfig.baseURL}${url}`,
+    url: `${baseURL}${url}`,
     method,
   };
 
   if (url === '/oauth/request_token') {
     requestData.data = data;
-  }
-
-  if (method === 'get') {
-    requestData.data = params;
+  } else if (method === 'get') {
+    requestData.params = params;
+  } else {
+    requestData.data = data;
   }
 
   const authHeader = oauthClient($).toHeader(

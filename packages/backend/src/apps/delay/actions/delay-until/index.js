@@ -1,10 +1,10 @@
 import defineAction from '../../../../helpers/define-action.js';
+import { isValidDateString } from '../../../../helpers/date-utils.js';
 
 export default defineAction({
   name: 'Delay until',
   key: 'delayUntil',
-  description:
-    'Delays the execution of the next action until a specified date.',
+  description: 'Delays the execution of the next action until a specified date.',
   arguments: [
     {
       label: 'Delay until (Date)',
@@ -19,6 +19,10 @@ export default defineAction({
   async run($) {
     const { delayUntil } = $.step.parameters;
 
+    if (!isValidDateString(delayUntil)) {
+      throw new Error(`Invalid date string: ${delayUntil}`);
+    }
+
     const dataItem = {
       delayUntil,
     };
@@ -26,3 +30,14 @@ export default defineAction({
     $.setActionItem({ raw: dataItem });
   },
 });
+
+function isValidDateString(dateString) {
+  const regex = /^\d{4}-\d{2}-\d{2}$/;
+  return regex.test(dateString);
+}
+
+
+function isValidDateString(dateString) {
+  const regex = /^\d{4}-\d{2}-\d{2}$/;
+  return regex.test(dateString);
+}

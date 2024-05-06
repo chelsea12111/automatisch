@@ -1,6 +1,3 @@
-// Based on the GitLab Webhook events documentation:
-// https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#job-events
-
 interface User {
   id: number;
   name: string;
@@ -39,24 +36,57 @@ interface Runner {
   tags: string[];
 }
 
-export default {
-  object_kind: 'build' as const, // using const assertions to make TypeScript infer the correct literal type
-  ref: 'gitlab-script-trigger',
+type ObjectKind = 'build';
+type RefType = 'gitlab-script-trigger';
+type BuildStatus = 'created';
+type VisibilityLevel = number;
+
+type Build = {
+  object_kind: ObjectKind;
+  ref: RefType;
+  tag: false;
+  before_sha: string;
+  sha: string;
+  build_id: number;
+  build_name: string;
+  build_stage: string;
+  build_status: BuildStatus;
+  build_created_at: string;
+  build_started_at: string | null;
+  build_finished_at: string | null;
+  build_duration: string | null;
+  build_queued_duration: number;
+  build_allow_failure: boolean;
+  build_failure_reason: 'script_failure';
+  retries_count: number;
+  pipeline_id: number;
+  project_id: number;
+  project_name: string;
+  user: User;
+  commit: Commit;
+  repository: Repository;
+  runner: Runner;
+  environment: string | null;
+};
+
+const build: Build = {
+  object_kind: 'build' as const,
+  ref: 'gitlab-script-trigger' as const,
   tag: false,
   before_sha: '2293ada6b400935a1378653304eaf6221e0fdb8f',
   sha: '2293ada6b400935a1378653304eaf6221e0fdb8f',
   build_id: 1977,
   build_name: 'test',
   build_stage: 'test',
-  build_status: 'created',
+  build_status: 'created' as const,
   build_created_at: '2021-02-23T02:41:37.886Z',
   build_started_at: null,
   build_finished_at: null,
   build_duration: null,
-  build_queued_duration: 1095.588715, // duration in seconds
+  build_queued_duration: 1095.588715,
   build_allow_failure: false,
   build_failure_reason: 'script_failure',
-  retries_count: 2, // the second retry of this job
+  retries_count: 2,
   pipeline_id: 2366,
   project_id: 380,
   project_name: 'gitlab-org/gitlab-test',
@@ -66,7 +96,7 @@ export default {
     email: 'user@gitlab.com',
     avatar_url:
       'http://www.gravatar.com/avatar/e32bd13e2add097461cb96824b7a829c?s=80\u0026d=identicon',
-  } as User,
+  },
   commit: {
     id: 2366,
     name: 'Build pipeline',
@@ -78,22 +108,8 @@ export default {
     duration: null,
     started_at: null,
     finished_at: null,
-  } as Commit,
+  },
   repository: {
     name: 'gitlab_test',
     description: 'Atque in sunt eos similique dolores voluptatem.',
-    homepage: 'http://192.168.64.1:3005/gitlab-org/gitlab-test',
-    git_ssh_url: 'git@192.168.64.1:gitlab-org/gitlab-test.git',
-    git_http_url: 'http://192.168.64.1:3005/gitlab-org/gitlab-test.git',
-    visibility_level: 20,
-  } as Repository,
-  runner: {
-    active: true,
-    runner_type: 'project_type',
-    is_shared: false,
-    id: 380987,
-    description: 'shared-runners-manager-6.gitlab.com',
-    tags: ['linux', 'docker'],
-  } as Runner,
-  environment: null,
-};
+    homepage: `${

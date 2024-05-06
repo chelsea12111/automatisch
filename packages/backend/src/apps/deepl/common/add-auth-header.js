@@ -1,10 +1,13 @@
-const addAuthHeader = ($, requestConfig) => {
-  if ($.auth.data?.authenticationKey) {
-    const authorizationHeader = `DeepL-Auth-Key ${$.auth.data.authenticationKey}`;
-    requestConfig.headers.Authorization = authorizationHeader;
+const addAuthHeader = (config, authData) => {
+  if (!authData || !authData.authenticationKey) {
+    return config;
   }
 
-  return requestConfig;
+  const authorizationHeader = `DeepL-Auth-Key ${authData.authenticationKey}`;
+  config.headers = config.headers || {};
+  config.headers.Authorization = authorizationHeader;
+
+  return config;
 };
 
 export default addAuthHeader;

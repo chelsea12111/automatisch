@@ -1,8 +1,12 @@
 import defineApp from '../../helpers/define-app.js';
 import addAuthHeader from './common/add-auth-header.js';
-import auth from './auth/index.js';
-import triggers from './triggers/index.js';
-import dynamicData from './dynamic-data/index.js';
+import authConfig from './auth/index.js';
+import triggersConfig from './triggers/index.js';
+import dynamicDataConfig from './dynamic-data/index.js';
+
+const { auth, setupAuth } = authConfig;
+const { triggers } = triggersConfig;
+const { dynamicData } = dynamicDataConfig;
 
 export default defineApp({
   name: 'Placetel',
@@ -14,7 +18,10 @@ export default defineApp({
   apiBaseUrl: 'https://api.placetel.de',
   primaryColor: '069dd9',
   beforeRequest: [addAuthHeader],
-  auth,
+  auth: {
+    ...auth,
+    setup: setupAuth,
+  },
   triggers,
   dynamicData,
 });

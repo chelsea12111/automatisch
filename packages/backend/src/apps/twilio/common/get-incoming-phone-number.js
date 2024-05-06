@@ -1,7 +1,22 @@
-export default async function getIncomingPhoneNumber($) {
-  const phoneNumberSid = $.step.parameters.phoneNumberSid;
-  const path = `/2010-04-01/Accounts/${$.auth.data.accountSid}/IncomingPhoneNumbers/${phoneNumberSid}.json`;
-  const response = await $.http.get(path);
+import axios from 'axios';
 
-  return response.data;
+export default async function getIncomingPhoneNumber({ step, auth }) {
+  const phoneNumberSid = step.parameters.phoneNumberSid;
+  const accountSid = auth.data.accountSid;
+  const path = `/2010-04-01/Accounts/${accountSid}/IncomingPhoneNumbers/${phoneNumberSid}.json`;
+
+  try {
+    const response = await axios.get(path, {
+      auth: {
+        username: accountSid,
+        password: auth.data.authToken,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    // Handle error here
+    console.error(error);
+    throw error;
+  }
 }

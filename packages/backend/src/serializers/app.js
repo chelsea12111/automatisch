@@ -1,5 +1,5 @@
 const appSerializer = (app) => {
-  let appData = {
+  const appData = {
     key: app.key,
     name: app.name,
     iconUrl: app.iconUrl,
@@ -8,11 +8,11 @@ const appSerializer = (app) => {
     supportsConnections: app.supportsConnections,
   };
 
-  if (app.connectionCount) {
+  if (app.connectionCount !== undefined) {
     appData.connectionCount = app.connectionCount;
   }
 
-  if (app.flowCount) {
+  if (app.flowCount !== undefined) {
     appData.flowCount = app.flowCount;
   }
 

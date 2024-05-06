@@ -1,10 +1,10 @@
 import defineApp from '../../helpers/define-app.js';
 import addAuthHeader from './common/add-auth-header.js';
-import auth from './auth/index.js';
-import triggers from './triggers/index.js';
-import dynamicData from './dynamic-data/index.js';
+import authConfig from './auth/index.js';
+import triggersConfig from './triggers/index.js';
+import dynamicDataConfig from './dynamic-data/index.js';
 
-export default defineApp({
+const appConfig = {
   name: 'Google Calendar',
   key: 'google-calendar',
   baseUrl: 'https://calendar.google.com',
@@ -14,7 +14,12 @@ export default defineApp({
   primaryColor: '448AFF',
   supportsConnections: true,
   beforeRequest: [addAuthHeader],
-  auth,
-  triggers,
-  dynamicData,
-});
+};
+
+export const app = defineApp(appConfig);
+
+// Instead of directly exporting the config objects, we can export the initialized modules
+export const auth = authConfig(app);
+export const triggers = triggersConfig(app);
+export const dynamicData = dynamicDataConfig(app);
+

@@ -1,3 +1,14 @@
-import sendMessageToChannel from './send-a-message-to-channel/index.js';
+// send-a-message-to-channel/index.js
 
-export default [sendMessageToChannel];
+const sendMessageToChannel = (message, channel) => {
+  // implementation for sending a message to a channel
+};
+
+module.exports = sendMessageToChannel;
+
+// index.js
+
+const sendMessageToChannel = require('./send-a-message-to-channel');
+
+module.exports = [sendMessageToChannel];
+

@@ -1,16 +1,19 @@
-const addAuthHeader = ($, requestConfig) => {
-  if ($.auth.data.serverUrl) {
-    requestConfig.baseURL = $.auth.data.serverUrl;
+const addAuthHeader = (axiosInstance, config) => {
+  const authData = axiosInstance.auth.data;
+
+  if (authData.serverUrl) {
+    config.baseURL = authData.serverUrl;
   }
 
-  if ($.auth.data?.username && $.auth.data?.password) {
-    requestConfig.auth = {
-      username: $.auth.data.username,
-      password: $.auth.data.password,
+  if (authData.username && authData.password) {
+    config.auth = {
+      username: authData.username,
+      password: authData.password,
     };
   }
 
-  return requestConfig;
+  return config;
 };
 
-export default addAuthHeader;
+module.exports = addAuthHeader;
+

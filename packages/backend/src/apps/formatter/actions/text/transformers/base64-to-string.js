@@ -1,8 +1,11 @@
-const base64ToString = ($) => {
-  const input = $.step.parameters.input;
+const base64ToString = (input) => {
+  if (!input) {
+    throw new Error('Input parameter is required');
+  }
+
   const decodedString = Buffer.from(input, 'base64').toString('utf8');
 
   return decodedString;
 };
 
-export default base64ToString;
+module.exports = base64ToString;

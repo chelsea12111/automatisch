@@ -5,11 +5,6 @@ import newPayments from './new-payments/index.js';
 import newProjects from './new-projects/index.js';
 import newQuotes from './new-quotes/index.js';
 
-export default [
-  newClients,
-  newCredits,
-  newInvoices,
-  newPayments,
-  newProjects,
-  newQuotes,
-];
+const modules = { newClients, newCredits, newInvoices, newPayments, newProjects, newQuotes };
+
+export default modules;

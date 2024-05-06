@@ -1,13 +1,13 @@
 import { ExpressAdapter } from '@bull-board/express';
 import { createBullBoard } from '@bull-board/api';
-import { BullMQAdapter } from '@bull-board/api/bullMQAdapter.js';
-import flowQueue from '../queues/flow.js';
-import triggerQueue from '../queues/trigger.js';
-import actionQueue from '../queues/action.js';
-import emailQueue from '../queues/email.js';
-import deleteUserQueue from '../queues/delete-user.ee.js';
-import removeCancelledSubscriptionsQueue from '../queues/remove-cancelled-subscriptions.ee.js';
-import appConfig from '../config/app.js';
+import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
+import flowQueue from '../queues/flow';
+import triggerQueue from '../queues/trigger';
+import actionQueue from '../queues/action';
+import emailQueue from '../queues/email';
+import deleteUserQueue from '../queues/delete-user';
+import removeCancelledSubscriptionsQueue from '../queues/remove-cancelled-subscriptions';
+import appConfig from '../config/app';
 
 const serverAdapter = new ExpressAdapter();
 
@@ -23,21 +23,16 @@ if (appConfig.isCloud) {
   queues.push(new BullMQAdapter(removeCancelledSubscriptionsQueue));
 }
 
-const shouldEnableBullDashboard = () => {
-  return (
-    appConfig.enableBullMQDashboard &&
-    appConfig.bullMQDashboardUsername &&
-    appConfig.bullMQDashboardPassword
-  );
-};
+const createBullBoardHandler = async (serverAdapter: ExpressAdapter) => {
+  if (!appConfig.enableBullMQDashboard || !appConfig.bullMQDashboardUsername || !appConfig.bullMQDashboardPassword) {
+    return;
+  }
 
-const createBullBoardHandler = async (serverAdapter) => {
-  if (!shouldEnableBullDashboard) return;
-
-  createBullBoard({
+  await createBullBoard({
     queues,
     serverAdapter,
   });
 };
 
 export { createBullBoardHandler, serverAdapter };
+

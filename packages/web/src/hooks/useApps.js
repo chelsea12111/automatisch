@@ -1,15 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
-
 import api from 'helpers/api';
 
 export default function useApps(variables) {
-  const trueOnlyVariables =
-    variables &&
-    Object.fromEntries(
-      Object.entries(variables).filter(
-        ([key, value]) => value === true || key === 'name',
-      ),
-    );
+  const trueOnlyVariables = variables
+    ? Object.fromEntries(
+        Object.entries(variables).filter(
+          ([key, value]) => value === true || key === 'name',
+        ),
+      )
+    : {};
 
   const query = useQuery({
     queryKey: ['apps', trueOnlyVariables],
@@ -21,6 +20,7 @@ export default function useApps(variables) {
 
       return data;
     },
+    enabled: Boolean(trueOnlyVariables.name),
   });
 
   return query;

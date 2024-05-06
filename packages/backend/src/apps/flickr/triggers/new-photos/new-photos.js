@@ -1,3 +1,16 @@
+type Photo = {
+  id: string;
+  // add other properties as needed
+};
+
+type PhotosResponse = {
+  photos: {
+    page: number;
+    pages: number;
+    photo: Photo[];
+  };
+};
+
 const extraFields = [
   'description',
   'license',
@@ -24,34 +37,49 @@ const extraFields = [
   'url_c',
   'url_l',
   'url_o',
-].join(',');
+];
 
-const newPhotos = async ($) => {
+const newPhotos = async (auth: { data: { userId: string } }) => {
   let page = 1;
   let pages = 1;
 
   do {
-    const params = {
-      page,
-      per_page: 500,
-      user_id: $.auth.data.userId,
-      extras: extraFields,
-      method: 'flickr.photos.search',
-      format: 'json',
-      nojsoncallback: 1,
-    };
-    const response = await $.http.get('/rest', { params });
-    const photos = response.data.photos;
-    page = photos.page + 1;
-    pages = photos.pages;
-
-    for (const photo of photos.photo) {
-      $.pushTriggerItem({
-        raw: photo,
-        meta: {
-          internalId: photo.id,
+    try {
+      const response = await fetch('/rest', {
+        method: 'GET',
+        params: {
+          page,
+          per_page: 500,
+          user_id: auth.data.userId,
+          extras: extraFields.join(','),
+          method: 'flickr.photos.search',
+          format: 'json',
+          nojsoncallback: 1,
         },
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: PhotosResponse = await response.json();
+      const photos = data.photos.photo;
+
+      for (const photo of photos) {
+        // Use `Object.assign` to create a new object with the desired properties
+        $.pushTriggerItem({
+          raw: photo,
+          meta: Object.assign({}, photo, {
+            internalId: photo.id,
+          }),
+        });
+      }
+
+      page = data.photos.page + 1;
+      pages = data.photos.pages;
+
+    } catch (error) {
+      console.error(`Error: ${error}`);
     }
   } while (page <= pages);
 };
